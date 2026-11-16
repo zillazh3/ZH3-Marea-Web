@@ -70,3 +70,9 @@ h1 {
     scroll-behavior: auto !important;
   }
 }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+}

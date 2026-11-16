@@ -12,7 +12,9 @@
   aria-label={i18n.m.shell.notifications}
 >
   {#each notifications.items as toast (toast.id)}
-    <div class="toast" class:ok={toast.kind === 'ok'}>{toast.message}</div>
+    <div class="toast" class:ok={toast.kind === 'ok'} class:error={toast.kind === 'error'}>
+      {toast.message}
+    </div>
   {/each}
 </div>
 
@@ -44,6 +46,12 @@
     box-shadow: var(--shadow-toast);
     font-size: var(--fs-sm);
     animation: rise var(--dur-toast) var(--ease);
+  }
+
+  .toast.error {
+    max-width: min(420px, calc(100vw - 2 * var(--space-4)));
+    border-radius: var(--r-card);
+    border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
   }
 
   .toast.ok {

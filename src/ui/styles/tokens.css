@@ -121,6 +121,14 @@
   --dur-screen: 0.2s;
 }
 
+/* Library thumbnails: lyrics over a darkened cover, the same in both themes. */
+:root {
+  --thumb-veil-top: rgba(0, 0, 0, 0.05);
+  --thumb-veil-bottom: rgba(0, 0, 0, 0.45);
+  --thumb-text: rgba(255, 255, 255, 0.4);
+  --thumb-text-active: #ffffff;
+}
+
 /* Placeholder cover art until real artwork exists: three colors per cover, picked by index. */
 :root {
   --cover-0-c1: #2b56ff;
