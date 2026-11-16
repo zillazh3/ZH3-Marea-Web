@@ -5,9 +5,9 @@ import {
   type LocalePreference,
 } from '@/features/i18n/locale';
 import type { Messages } from '@/features/i18n/messages';
+import { preferences } from './state/preferences.svelte';
 
-let preference = $state<LocalePreference>('auto');
-const locale = $derived(resolveLocale(preference, navigator.languages));
+const locale = $derived(resolveLocale(preferences.value.locale, navigator.languages));
 
 export const i18n = {
   get locale(): Locale {
@@ -17,9 +17,9 @@ export const i18n = {
     return messagesFor(locale);
   },
   get preference(): LocalePreference {
-    return preference;
+    return preferences.value.locale;
   },
   setPreference(next: LocalePreference): void {
-    preference = next;
+    preferences.update({ locale: next });
   },
 };
