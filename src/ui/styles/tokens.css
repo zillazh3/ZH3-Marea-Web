@@ -96,3 +96,56 @@
   --pop-bg: #ffffff;
   --veil: 0.15;
 }
+
+/* Shell: rail, dock, overlays */
+:root {
+  --nav-h: 44px;
+  --nav-h-dock: 54px;
+  --dock-h: 66px;
+  --dock-inset: 10px;
+  --dock-clearance: 170px;
+  --mobile-player-bottom: 84px;
+  --ring-size: 30px;
+
+  --shadow-rail: 0 18px 50px -24px var(--shadow-color);
+  --shadow-menu: 0 20px 50px -20px var(--shadow-color);
+  --shadow-palette: 0 40px 90px -30px var(--shadow-color-strong);
+  --shadow-toast: 0 16px 40px -20px var(--shadow-color);
+  --scrim: rgba(5, 4, 12, 0.5);
+
+  --dur-label: 0.18s;
+  --dur-pop: 0.16s;
+  --dur-toast: 0.18s;
+  --dur-tip: 0.12s;
+  --dur-surge: 0.5s;
+  --dur-screen: 0.2s;
+}
+
+/* Placeholder cover art until real artwork exists: three colors per cover, picked by index. */
+:root {
+  --cover-0-c1: #2b56ff;
+  --cover-0-c2: #6a35ff;
+  --cover-0-c3: #2fc6d9;
+  --cover-1-c1: #1c2e5e;
+  --cover-1-c2: #c86b98;
+  --cover-1-c3: #f2b880;
+  --cover-2-c1: #0f5c5a;
+  --cover-2-c2: #1e2a78;
+  --cover-2-c3: #6ee7c8;
+  --cover-3-c1: #5b2a86;
+  --cover-3-c2: #e05d7b;
+  --cover-3-c3: #ffc56b;
+  --cover-4-c1: #22304f;
+  --cover-4-c2: #7e8fb5;
+  --cover-4-c3: #cfe3f2;
+  --cover-5-c1: #3a157a;
+  --cover-5-c2: #101a6b;
+  --cover-5-c3: #7b93ff;
+}
+
+:root {
+  --page-pad: 28px 32px 32px 20px;
+  --page-pad-dock: 18px 16px var(--dock-clearance);
+  --screen-max: 1320px;
+  --fs-xl-dock: 24px;
+}
