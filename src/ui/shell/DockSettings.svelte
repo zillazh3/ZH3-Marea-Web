@@ -17,7 +17,7 @@
     position: fixed;
     z-index: 18;
     top: var(--space-4);
-    right: var(--space-4);
+    right: calc(var(--space-4) + env(safe-area-inset-right));
     display: grid;
     place-items: center;
     width: 38px;

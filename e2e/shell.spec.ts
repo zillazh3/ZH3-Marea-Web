@@ -145,6 +145,16 @@ test.describe('dock', () => {
     await expect(page).toHaveURL(/\/settings$/);
   });
 
+  test('uses the dock on a phone held sideways', async ({ page }) => {
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.goto('/');
+    const nav = page.getByRole('navigation', { name: 'Principal' });
+    await expect(nav.getByRole('link')).toHaveCount(5);
+    const box = await nav.boundingBox();
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeGreaterThan(330);
+    await expect(page.getByRole('button', { name: /menú/ })).toHaveCount(0);
+  });
+
   test('shows the mini player above the dock', async ({ page }) => {
     await page.goto('/?seed');
     const player = page.getByRole('group', { name: 'Sonando ahora' });

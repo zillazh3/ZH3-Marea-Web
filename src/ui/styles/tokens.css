@@ -103,7 +103,7 @@
   --nav-h-dock: 54px;
   --dock-h: 66px;
   --dock-inset: 10px;
-  --dock-clearance: 170px;
+  --dock-clearance: 170px; /* shrunk for short viewports at the end of this file */
   --mobile-player-bottom: 84px;
   --ring-size: 30px;
 
@@ -148,4 +148,10 @@
   --page-pad-dock: 18px 16px var(--dock-clearance);
   --screen-max: 1320px;
   --fs-xl-dock: 24px;
+}
+
+@media (max-height: 500px) {
+  :root {
+    --dock-clearance: 96px;
+  }
 }

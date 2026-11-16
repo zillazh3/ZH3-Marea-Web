@@ -77,18 +77,20 @@
   main {
     min-height: 100dvh;
     padding: var(--page-pad);
-    margin-left: calc(var(--rail-w) + 2 * var(--rail-gap));
+    margin-left: calc(var(--rail-w) + 2 * var(--rail-gap) + env(safe-area-inset-left));
     max-width: calc(var(--screen-max) + var(--rail-w) + 2 * var(--rail-gap));
     outline: none;
     transition: margin-left var(--dur-rail) var(--ease);
   }
 
   main.collapsed {
-    margin-left: calc(var(--rail-w-collapsed) + 2 * var(--rail-gap));
+    margin-left: calc(var(--rail-w-collapsed) + 2 * var(--rail-gap) + env(safe-area-inset-left));
   }
 
   main.dock {
     margin-left: 0;
     padding: var(--page-pad-dock);
+    padding-left: calc(var(--space-4) + env(safe-area-inset-left));
+    padding-right: calc(var(--space-4) + env(safe-area-inset-right));
   }
 </style>

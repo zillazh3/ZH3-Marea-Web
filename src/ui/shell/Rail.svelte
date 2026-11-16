@@ -117,7 +117,7 @@
     z-index: 20;
     top: var(--rail-gap);
     bottom: var(--rail-gap);
-    left: var(--rail-gap);
+    left: calc(var(--rail-gap) + env(safe-area-inset-left));
     width: var(--rail-w);
     display: flex;
     flex-direction: column;
@@ -128,7 +128,10 @@
     border: 1px solid var(--border);
     backdrop-filter: blur(26px) saturate(150%);
     box-shadow: var(--shadow-rail);
-    overflow: clip;
+    overflow-x: clip;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
     transition: width var(--dur-rail) var(--ease);
   }
 
@@ -138,8 +141,9 @@
 
   .rail.dock {
     top: auto;
-    left: var(--dock-inset);
-    right: var(--dock-inset);
+    left: calc(var(--dock-inset) + env(safe-area-inset-left));
+    right: calc(var(--dock-inset) + env(safe-area-inset-right));
+    overflow-y: clip;
     bottom: calc(var(--dock-inset) + env(safe-area-inset-bottom));
     width: auto;
     height: var(--dock-h);

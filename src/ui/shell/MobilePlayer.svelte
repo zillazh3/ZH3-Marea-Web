@@ -33,8 +33,8 @@
   .player {
     position: fixed;
     z-index: 19;
-    left: var(--space-4);
-    right: var(--space-4);
+    left: calc(var(--space-4) + env(safe-area-inset-left));
+    right: calc(var(--space-4) + env(safe-area-inset-right));
     bottom: calc(var(--mobile-player-bottom) + env(safe-area-inset-bottom));
     display: grid;
     grid-template-columns: 36px 1fr auto;
@@ -45,6 +45,13 @@
     background: var(--rail-bg);
     border: 1px solid var(--border);
     backdrop-filter: blur(22px);
+  }
+
+  /* Sideways on a phone there is no vertical room for both the player and the dock. */
+  @media (max-height: 500px) {
+    .player {
+      display: none;
+    }
   }
 
   .cover {
