@@ -252,6 +252,16 @@ def goldens(Engine, Params, exact_lyrics):
     return [run_scenario(Engine, Params, make(), {**spec, "name": name}) for name, make, spec in cases]
 
 
+def export_lyrics_fixtures(desktop: Path, out: Path) -> None:
+    from marea.model import lyrics as model
+    import lyrics_cases
+
+    out.mkdir(parents=True, exist_ok=True)
+    demo = desktop / "assets" / "demo" / "marea-de-luz.ttml"
+    shutil.copyfile(demo, out / "marea-de-luz.ttml")
+    write(out, "parsers.json", lyrics_cases.parsers_fixture(model, demo))
+
+
 def main():
     desktop, out = parse_args()
     sys.path.insert(0, str(desktop))
@@ -268,6 +278,7 @@ def main():
     write(out, "curves.json", curves_fixture(curves, interlude))
     write(out, "layout.json", layout_fixture(layout))
     write(out, "motion.json", motion_fixture(motion, lyrics))
+    export_lyrics_fixtures(desktop, out.parent / "lyrics")
     for scenario in goldens(Engine, Params, exact_lyrics):
         write(out, f"golden-{scenario['name']}.json", scenario)
 
