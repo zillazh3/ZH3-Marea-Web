@@ -1,0 +1,98 @@
+/*
+ * Design tokens: the only place colors, sizes and timings are defined.
+ * Mirrors marea/ui/theme.py of the desktop app, with the softer radii and motion of the approved web mockup.
+ */
+
+@font-face {
+  font-family: 'Inter Tight';
+  src: url('../fonts/InterTight-Variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  --bg: #0e0d1a;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-2: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f4f3fa;
+  --muted: rgba(244, 243, 250, 0.62);
+  --faint: rgba(244, 243, 250, 0.38);
+  --pill: rgba(255, 255, 255, 0.08);
+  --hover: rgba(255, 255, 255, 0.05);
+
+  --accent: #2b56ff;
+  --accent-2: #6a35ff;
+  --accent-icon: #7b93ff;
+  --danger: #e5484d;
+  --ok: #3ddc97;
+  --on-accent: #ffffff;
+
+  --rail-bg: rgba(24, 22, 44, 0.58);
+  --pop-bg: #16152a;
+  --veil: 0.16;
+  --shadow-color: rgba(0, 0, 0, 0.6);
+  --shadow-color-strong: rgba(0, 0, 0, 0.8);
+
+  --grad: linear-gradient(135deg, var(--accent), var(--accent-2));
+  --grad-hover: linear-gradient(135deg, var(--accent-icon), var(--accent-2));
+
+  --font: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-body: 14px;
+  --fs-md: 15px;
+  --fs-lg: 20px;
+  --fs-xl: 28px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --r-ctl: 10px;
+  --r-card: 14px;
+  --r-nav: 12px;
+  --r-preview: 18px;
+  --r-rail: 22px;
+  --r-pill: 999px;
+
+  --rail-w: 240px;
+  --rail-w-collapsed: 76px;
+  --rail-gap: 12px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-tide: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --dur-fast: 0.15s;
+  --dur-ui: 0.2s;
+  --dur-rail: 0.24s;
+  --dur-tide: 0.46s;
+  --dur-ambient: 0.6s;
+  --dur-wave: 1.8s;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f4f4fb;
+  --surface: rgba(14, 13, 26, 0.04);
+  --surface-2: rgba(14, 13, 26, 0.07);
+  --border: rgba(14, 13, 26, 0.1);
+  --text: #15142a;
+  --muted: rgba(21, 20, 42, 0.62);
+  --faint: rgba(21, 20, 42, 0.42);
+  --pill: rgba(14, 13, 26, 0.08);
+  --hover: rgba(14, 13, 26, 0.05);
+
+  --accent-icon: #2b56ff;
+  --danger: #d93036;
+  --ok: #15a06b;
+
+  --rail-bg: rgba(255, 255, 255, 0.62);
+  --pop-bg: #ffffff;
+  --veil: 0.15;
+}
