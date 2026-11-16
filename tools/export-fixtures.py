@@ -260,6 +260,9 @@ def export_lyrics_fixtures(desktop: Path, out: Path) -> None:
     demo = desktop / "assets" / "demo" / "marea-de-luz.ttml"
     shutil.copyfile(demo, out / "marea-de-luz.ttml")
     write(out, "parsers.json", lyrics_cases.parsers_fixture(model, demo))
+    from marea.providers.lyrics import lrclib, spicy
+
+    write(out, "providers.json", lyrics_cases.providers_fixture(spicy, lrclib))
 
 
 def main():

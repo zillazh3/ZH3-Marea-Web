@@ -131,3 +131,76 @@ def parsers_fixture(model, demo_ttml: Path):
     for start, text, nxt in ((0, "x", None), (0, "x" * 100, None), (1000, "hola", 2000), (1000, "hola", 90000), (0, "ñ" * 40, 99999)):
         out["guessEnd"].append({"start": start, "text": text, "next": nxt, "expected": model._guess_end(start, text, nxt)})
     return out
+
+
+# ---- providers: responses are parsed by static methods, so no network is needed ----
+
+def _syl(text, start, end, part=False):
+    return {"Text": text, "StartTime": start, "EndTime": end, "IsPartOfWord": part}
+
+
+SPICY = {
+    "syllable-with-background": {"Body": {"Type": "Syllable", "source": "apple_music", "SongWriters": ["A. Writer", "B. Writer"], "Content": [
+        {"Lead": {"StartTime": 1.0, "EndTime": 4.0, "Syllables": [_syl("Hel", 1.0, 1.5, True), _syl("lo", 1.5, 2.0), _syl("world", 2.0, 4.0)]},
+         "Background": [{"StartTime": 3.0, "EndTime": 4.5, "Syllables": [_syl("ooh", 3.0, 4.5)]}]},
+        {"OppositeAligned": True, "Lead": {"Syllables": [_syl("Second", 5.0, 6.0), _syl(" ", 6.0, 6.0), _syl("line", 6.0, 7.0)]}},
+    ]}},
+    "community-credit": {"Body": {"Type": "Syllable", "source": "spicy_lyrics",
+                                   "UploadAttribution": {"Uploader": {"username": "up​loader"}, "Maker": {"username": "m" * 50}},
+                                   "Content": [{"Lead": {"Syllables": [_syl("a", 0, 1)]}}]}},
+    "line-type": {"Body": {"Type": "Line", "source": "spotify", "Content": [
+        {"Text": "primera  linea", "StartTime": 1.0, "EndTime": 3.0},
+        {"Text": "segunda", "StartTime": 3.0, "OppositeAligned": True},
+        {"Text": "sin fin", "StartTime": 20.0},
+        {"Text": "", "StartTime": 30.0},
+        {"Text": "sin inicio"},
+    ]}},
+    "line-type-with-lead": {"Body": {"Type": "Line", "Content": [{"Lead": {"Syllables": [_syl("x", 2, 3)]}}]}},
+    "static": {"Body": {"Type": "Static", "Content": [{"Text": "no timing"}]}},
+    "malformed-items-skipped": {"Body": {"Type": "Syllable", "Content": [
+        {"Lead": {"Syllables": [{"Text": "bad"}]}}, {"Lead": {"Syllables": [_syl("ok", 1, 2)]}}, "nonsense", {"Lead": None}]}},
+    "empty-content": {"Body": {"Type": "Syllable", "Content": []}},
+    "unsorted": {"Body": {"Type": "Line", "Content": [{"Text": "b", "StartTime": 5.0, "EndTime": 6.0}, {"Text": "a", "StartTime": 1.0, "EndTime": 2.0}]}},
+    "not-a-body": {"Body": "x"},
+    "bg-without-times": {"Body": {"Type": "Syllable", "Content": [{"Lead": {"StartTime": 1.0, "Syllables": [_syl("a", 1.2, 2.0)]},
+                                                                  "Background": [{"Syllables": [_syl("b", 1.0, 3.0)]}]}]}},
+}
+
+LRCLIB_RESULTS = [
+    {"id": 1, "duration": 200, "syncedLyrics": "[00:01.00]hola\n", "name": "A"},
+    {"id": 2, "duration": 205, "syncedLyrics": "[00:01.00]hola\n"},
+    {"id": 3, "duration": 201, "hasWordSync": True},
+    {"id": 4, "duration": 200, "syncedLyrics": None, "plainLyrics": "x"},
+    {"id": 5, "syncedLyrics": "[00:01.00]sin duracion\n"},
+    {"id": 6, "duration": 199.6, "syncedLyrics": "[00:01.00]x\n"},
+]
+
+LRCLIB_RAW = {
+    "instrumental": {"instrumental": True, "syncedLyrics": "[00:01.00]x\n"},
+    "word-sync": {"hasWordSync": True, "lyricsfile": "version: '1.0'\nlines:\n  - {text: hola, start_ms: 1000, end_ms: 2000}\n",
+                  "syncedLyrics": "[00:05.00]otro\n"},
+    "broken-lyricsfile-falls-back": {"hasWordSync": True, "lyricsfile": "version: '9'\nlines: []\n", "syncedLyrics": "[00:05.00]otro\n"},
+    "empty-lyricsfile-falls-back": {"hasWordSync": True, "lyricsfile": "version: '1.0'\nlines: []\n", "syncedLyrics": "[00:05.00]otro\n"},
+    "synced-only": {"syncedLyrics": "[00:01.00]uno\n[00:03.00]dos\n"},
+    "no-lyrics": {"syncedLyrics": ""},
+    "plain-only": {"plainLyrics": "solo texto"},
+}
+
+
+def providers_fixture(spicy, lrclib):
+    out = {"spicy": [], "lrclibBest": [], "lrclibToLyrics": []}
+    for name, raw in SPICY.items():
+        ly = spicy.SpicyLyricsProvider._to_lyrics(raw)
+        out["spicy"].append({"name": name, "input": raw, "expected": lyrics_json(ly) if ly else None})
+    for duration_ms in (None, 200000, 202000, 150000):
+        class Q:  # the desktop passes a TrackQuery; only duration_ms is read by _best
+            pass
+        q = Q()
+        q.duration_ms = duration_ms
+        best = lrclib.LrclibProvider._best(LRCLIB_RESULTS, q)
+        out["lrclibBest"].append({"durationMs": duration_ms, "expected": best["id"] if best else None})
+    for name, raw in LRCLIB_RAW.items():
+        ly = lrclib.LrclibProvider._to_lyrics(raw)
+        out["lrclibToLyrics"].append({"name": name, "input": raw, "expected": lyrics_json(ly) if ly else None})
+    out["lrclibResults"] = LRCLIB_RESULTS
+    return out
