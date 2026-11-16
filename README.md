@@ -1,0 +1,52 @@
+# ZH3 Marea (web)
+
+Syllable-synced, Apple Music-style lyric clips for TikTok, running entirely in your browser. Pick a song, choose a range of verses
+and export a 60 fps MP4 (1080x1920, 1080x1080 or 1920x1080). This is the web version of the desktop app ZH3 Marea.
+
+**Privacy:** everything stays on your device. There is no backend and there are no accounts. Projects, settings, audio files and
+exports live in your browser's storage. The only network calls go to the lyrics and music services you choose to use
+(LRCLIB, Spicy Lyrics, Spotify).
+
+Status: early development. See `tasks/todo.md` for progress and `docs/decisions/` for the reasoning behind each choice.
+
+## Run
+
+Requires Node 22.12 or newer.
+
+```sh
+npm install
+npm run dev        # http://127.0.0.1:5173
+```
+
+| Command | What it does |
+|---|---|
+| `npm run check` | typecheck, lint, format check and unit tests |
+| `npm run test:e2e` | Playwright end-to-end tests (first time: `npx playwright install chromium`) |
+| `npm run build` | production build in `dist/` |
+| `npm run format` | format the code with Prettier |
+
+The dev server binds `127.0.0.1` because Spotify does not accept `localhost` redirect URIs.
+
+## Layout
+
+```
+src/shared/    pure helpers (Python-compat math, hashes)
+src/engine/    animation engine, no DOM
+src/render/    draws a frame from engine state
+src/export/    worker, encoders, muxer
+src/features/  lyrics, projects, presets, hooks, wordfx, storage, i18n
+src/ui/        Svelte components, routes, design tokens
+```
+
+Imports point inward only (left to right above is the allowed direction of dependency); ESLint enforces it. See
+`docs/decisions/0001-layered-architecture.md`.
+
+## Deploy
+
+Cloudflare Workers with static assets on the free `workers.dev` subdomain (planned for milestone 9; see
+`docs/decisions/0007-hosting.md`). Nothing in the code depends on a domain.
+
+## License
+
+GNU AGPL-3.0, the same as the desktop app. If you modify it and offer it over a network, publish your changes under the same
+license. Credits for ported work and bundled assets are in `THIRD_PARTY.md`.
