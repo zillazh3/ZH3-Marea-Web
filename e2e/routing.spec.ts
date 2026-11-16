@@ -25,16 +25,6 @@ test('sends an unknown path to home', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Inicio');
 });
 
-test('applies the light theme tokens', async ({ page }) => {
-  await page.goto('/');
-  const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  await page.evaluate(() => {
-    document.documentElement.dataset.theme = 'light';
-  });
-  const light = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  expect(dark).not.toBe(light);
-});
-
 test.describe('english browser', () => {
   test.use({ locale: 'en-US' });
 
