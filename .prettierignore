@@ -1,0 +1,12 @@
+dist
+node_modules
+.wrangler
+playwright-report
+test-results
+docs
+tasks
+tests/fixtures
+package-lock.json
+*.md
+LICENSE
+src/ui/fonts
