@@ -1,0 +1,750 @@
+{
+  "schema": "marea.project",
+  "version": 1,
+  "title": "Marea de luz",
+  "artist": "Demo · letra original",
+  "cover_png_b64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==",
+  "source": "",
+  "track": null,
+  "audio": {
+    "path": "",
+    "offset_ms": 0.0
+  },
+  "lyrics": {
+    "source": "",
+    "credit": "",
+    "writers": [],
+    "lines": [
+      {
+        "start": 6000.0,
+        "end": 9000.0,
+        "agent": "v1",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "Ca",
+            "begin": 6000.0,
+            "end": 6333.333333333333,
+            "word_end": false
+          },
+          {
+            "text": "mi",
+            "begin": 6333.333333333333,
+            "end": 6666.666666666666,
+            "word_end": false
+          },
+          {
+            "text": "no",
+            "begin": 6666.666666666666,
+            "end": 6999.999999999999,
+            "word_end": true
+          },
+          {
+            "text": "so",
+            "begin": 6999.999999999999,
+            "end": 7333.333333333332,
+            "word_end": false
+          },
+          {
+            "text": "lo",
+            "begin": 7333.333333333332,
+            "end": 7666.666666666665,
+            "word_end": true
+          },
+          {
+            "text": "por",
+            "begin": 7666.666666666665,
+            "end": 7999.999999999998,
+            "word_end": true
+          },
+          {
+            "text": "la",
+            "begin": 7999.999999999998,
+            "end": 8333.333333333332,
+            "word_end": true
+          },
+          {
+            "text": "ciu",
+            "begin": 8333.333333333332,
+            "end": 8666.666666666666,
+            "word_end": false
+          },
+          {
+            "text": "dad",
+            "begin": 8666.666666666666,
+            "end": 9000.0,
+            "word_end": false
+          }
+        ],
+        "bg": []
+      },
+      {
+        "start": 9400.0,
+        "end": 13000.000000000007,
+        "agent": "v1",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "las",
+            "begin": 9400.0,
+            "end": 9676.923076923078,
+            "word_end": true
+          },
+          {
+            "text": "lu",
+            "begin": 9676.923076923078,
+            "end": 9953.846153846156,
+            "word_end": false
+          },
+          {
+            "text": "ces",
+            "begin": 9953.846153846156,
+            "end": 10230.769230769234,
+            "word_end": true
+          },
+          {
+            "text": "se",
+            "begin": 10230.769230769234,
+            "end": 10507.69230769231,
+            "word_end": true
+          },
+          {
+            "text": "de",
+            "begin": 10507.69230769231,
+            "end": 10784.615384615388,
+            "word_end": false
+          },
+          {
+            "text": "rri",
+            "begin": 10784.615384615388,
+            "end": 11061.538461538466,
+            "word_end": false
+          },
+          {
+            "text": "ten",
+            "begin": 11061.538461538466,
+            "end": 11338.461538461544,
+            "word_end": true
+          },
+          {
+            "text": "en",
+            "begin": 11338.461538461544,
+            "end": 11615.384615384623,
+            "word_end": true
+          },
+          {
+            "text": "el",
+            "begin": 11615.384615384623,
+            "end": 11892.3076923077,
+            "word_end": true
+          },
+          {
+            "text": "mar",
+            "begin": 11892.3076923077,
+            "end": 13000.000000000007,
+            "word_end": false
+          }
+        ],
+        "bg": []
+      },
+      {
+        "start": 13400.0,
+        "end": 17799.999999999996,
+        "agent": "v1",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "y",
+            "begin": 13400.0,
+            "end": 13638.461538461537,
+            "word_end": true
+          },
+          {
+            "text": "tu",
+            "begin": 13638.461538461537,
+            "end": 13876.923076923076,
+            "word_end": true
+          },
+          {
+            "text": "voz",
+            "begin": 13876.923076923076,
+            "end": 14830.76923076923,
+            "word_end": true
+          },
+          {
+            "text": "me",
+            "begin": 14830.76923076923,
+            "end": 15069.230769230768,
+            "word_end": true
+          },
+          {
+            "text": "lle",
+            "begin": 15069.230769230768,
+            "end": 15307.692307692305,
+            "word_end": false
+          },
+          {
+            "text": "ga",
+            "begin": 15307.692307692305,
+            "end": 15546.153846153842,
+            "word_end": true
+          },
+          {
+            "text": "sin",
+            "begin": 15546.153846153842,
+            "end": 15784.61538461538,
+            "word_end": true
+          },
+          {
+            "text": "pa",
+            "begin": 15784.61538461538,
+            "end": 16023.076923076918,
+            "word_end": false
+          },
+          {
+            "text": "la",
+            "begin": 16023.076923076918,
+            "end": 16261.538461538457,
+            "word_end": false
+          },
+          {
+            "text": "bras",
+            "begin": 16261.538461538457,
+            "end": 16499.999999999996,
+            "word_end": false
+          }
+        ],
+        "bg": [
+          {
+            "start": 16500.0,
+            "end": 17799.999999999996,
+            "syllables": [
+              {
+                "text": "sin",
+                "begin": 16500.0,
+                "end": 16825.0,
+                "word_end": true
+              },
+              {
+                "text": "pa",
+                "begin": 16825.0,
+                "end": 17150.0,
+                "word_end": false
+              },
+              {
+                "text": "la",
+                "begin": 17150.0,
+                "end": 17474.999999999996,
+                "word_end": false
+              },
+              {
+                "text": "bras",
+                "begin": 17474.999999999996,
+                "end": 17799.999999999996,
+                "word_end": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "start": 17900.0,
+        "end": 21100.0,
+        "agent": "v1",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "co",
+            "begin": 17900.0,
+            "end": 18220.0,
+            "word_end": false
+          },
+          {
+            "text": "mo",
+            "begin": 18220.0,
+            "end": 18540.0,
+            "word_end": true
+          },
+          {
+            "text": "un",
+            "begin": 18540.0,
+            "end": 18860.0,
+            "word_end": true
+          },
+          {
+            "text": "e",
+            "begin": 18860.0,
+            "end": 19180.0,
+            "word_end": false
+          },
+          {
+            "text": "co",
+            "begin": 19180.0,
+            "end": 19500.0,
+            "word_end": true
+          },
+          {
+            "text": "a",
+            "begin": 19500.0,
+            "end": 19820.0,
+            "word_end": false
+          },
+          {
+            "text": "zul",
+            "begin": 19820.0,
+            "end": 21100.0,
+            "word_end": false
+          }
+        ],
+        "bg": []
+      },
+      {
+        "start": 21400.0,
+        "end": 24399.99999999999,
+        "agent": "v2",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "Si",
+            "begin": 21400.0,
+            "end": 21733.333333333332,
+            "word_end": true
+          },
+          {
+            "text": "te",
+            "begin": 21733.333333333332,
+            "end": 22066.666666666664,
+            "word_end": true
+          },
+          {
+            "text": "pier",
+            "begin": 22066.666666666664,
+            "end": 22399.999999999996,
+            "word_end": false
+          },
+          {
+            "text": "do",
+            "begin": 22399.999999999996,
+            "end": 22733.33333333333,
+            "word_end": true
+          },
+          {
+            "text": "en",
+            "begin": 22733.33333333333,
+            "end": 23066.66666666666,
+            "word_end": false
+          },
+          {
+            "text": "tre",
+            "begin": 23066.66666666666,
+            "end": 23399.999999999993,
+            "word_end": true
+          },
+          {
+            "text": "la",
+            "begin": 23399.999999999993,
+            "end": 23733.333333333325,
+            "word_end": true
+          },
+          {
+            "text": "gen",
+            "begin": 23733.333333333325,
+            "end": 24066.666666666657,
+            "word_end": false
+          },
+          {
+            "text": "te",
+            "begin": 24066.666666666657,
+            "end": 24399.99999999999,
+            "word_end": false
+          }
+        ],
+        "bg": []
+      },
+      {
+        "start": 24800.0,
+        "end": 27999.99999999999,
+        "agent": "v2",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "te",
+            "begin": 24800.0,
+            "end": 25155.555555555555,
+            "word_end": true
+          },
+          {
+            "text": "en",
+            "begin": 25155.555555555555,
+            "end": 25511.11111111111,
+            "word_end": false
+          },
+          {
+            "text": "cuen",
+            "begin": 25511.11111111111,
+            "end": 25866.666666666664,
+            "word_end": false
+          },
+          {
+            "text": "tro",
+            "begin": 25866.666666666664,
+            "end": 26222.22222222222,
+            "word_end": true
+          },
+          {
+            "text": "en",
+            "begin": 26222.22222222222,
+            "end": 26577.777777777774,
+            "word_end": true
+          },
+          {
+            "text": "ca",
+            "begin": 26577.777777777774,
+            "end": 26933.333333333325,
+            "word_end": false
+          },
+          {
+            "text": "da",
+            "begin": 26933.333333333325,
+            "end": 27288.88888888888,
+            "word_end": true
+          },
+          {
+            "text": "can",
+            "begin": 27288.88888888888,
+            "end": 27644.444444444434,
+            "word_end": false
+          },
+          {
+            "text": "ción",
+            "begin": 27644.444444444434,
+            "end": 27999.99999999999,
+            "word_end": false
+          }
+        ],
+        "bg": []
+      },
+      {
+        "start": 33500.0,
+        "end": 37600.0,
+        "agent": "v1",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "Ma",
+            "begin": 33500.0,
+            "end": 33825.0,
+            "word_end": false
+          },
+          {
+            "text": "re",
+            "begin": 33825.0,
+            "end": 34150.00000000001,
+            "word_end": false
+          },
+          {
+            "text": "a",
+            "begin": 34150.00000000001,
+            "end": 34475.00000000001,
+            "word_end": true
+          },
+          {
+            "text": "de",
+            "begin": 34475.00000000001,
+            "end": 34800.000000000015,
+            "word_end": true
+          },
+          {
+            "text": "luz",
+            "begin": 34800.000000000015,
+            "end": 36100.00000000001,
+            "word_end": false
+          }
+        ],
+        "bg": [
+          {
+            "start": 36200.0,
+            "end": 37600.0,
+            "syllables": [
+              {
+                "text": "ma",
+                "begin": 36200.0,
+                "end": 36433.333333333336,
+                "word_end": false
+              },
+              {
+                "text": "re",
+                "begin": 36433.333333333336,
+                "end": 36666.66666666667,
+                "word_end": false
+              },
+              {
+                "text": "a",
+                "begin": 36666.66666666667,
+                "end": 37600.0,
+                "word_end": false
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "start": 37800.0,
+        "end": 40800.000000000015,
+        "agent": "v1",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "que",
+            "begin": 37800.0,
+            "end": 38133.333333333336,
+            "word_end": true
+          },
+          {
+            "text": "no",
+            "begin": 38133.333333333336,
+            "end": 38466.66666666667,
+            "word_end": true
+          },
+          {
+            "text": "se",
+            "begin": 38466.66666666667,
+            "end": 38800.00000000001,
+            "word_end": true
+          },
+          {
+            "text": "a",
+            "begin": 38800.00000000001,
+            "end": 39133.33333333334,
+            "word_end": false
+          },
+          {
+            "text": "pa",
+            "begin": 39133.33333333334,
+            "end": 39466.66666666668,
+            "word_end": false
+          },
+          {
+            "text": "ga",
+            "begin": 39466.66666666668,
+            "end": 40800.000000000015,
+            "word_end": false
+          }
+        ],
+        "bg": []
+      },
+      {
+        "start": 41200.0,
+        "end": 45000.000000000044,
+        "agent": "v1",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "ba",
+            "begin": 41200.0,
+            "end": 41516.66666666667,
+            "word_end": false
+          },
+          {
+            "text": "ja",
+            "begin": 41516.66666666667,
+            "end": 41833.33333333334,
+            "word_end": true
+          },
+          {
+            "text": "la",
+            "begin": 41833.33333333334,
+            "end": 42150.000000000015,
+            "word_end": true
+          },
+          {
+            "text": "ma",
+            "begin": 42150.000000000015,
+            "end": 42466.666666666686,
+            "word_end": false
+          },
+          {
+            "text": "re",
+            "begin": 42466.666666666686,
+            "end": 42783.33333333335,
+            "word_end": false
+          },
+          {
+            "text": "a,",
+            "begin": 42783.33333333335,
+            "end": 43100.00000000002,
+            "word_end": true
+          },
+          {
+            "text": "su",
+            "begin": 43100.00000000002,
+            "end": 43416.66666666669,
+            "word_end": false
+          },
+          {
+            "text": "be",
+            "begin": 43416.66666666669,
+            "end": 43733.333333333365,
+            "word_end": true
+          },
+          {
+            "text": "el",
+            "begin": 43733.333333333365,
+            "end": 44050.00000000003,
+            "word_end": true
+          },
+          {
+            "text": "co",
+            "begin": 44050.00000000003,
+            "end": 44366.6666666667,
+            "word_end": false
+          },
+          {
+            "text": "ra",
+            "begin": 44366.6666666667,
+            "end": 44683.33333333337,
+            "word_end": false
+          },
+          {
+            "text": "zón",
+            "begin": 44683.33333333337,
+            "end": 45000.000000000044,
+            "word_end": false
+          }
+        ],
+        "bg": []
+      },
+      {
+        "start": 45400.0,
+        "end": 48800.00000000002,
+        "agent": "v1",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "y",
+            "begin": 45400.0,
+            "end": 45740.0,
+            "word_end": true
+          },
+          {
+            "text": "yo",
+            "begin": 45740.0,
+            "end": 46080.00000000001,
+            "word_end": true
+          },
+          {
+            "text": "me",
+            "begin": 46080.00000000001,
+            "end": 46420.00000000001,
+            "word_end": true
+          },
+          {
+            "text": "que",
+            "begin": 46420.00000000001,
+            "end": 46760.000000000015,
+            "word_end": false
+          },
+          {
+            "text": "do",
+            "begin": 46760.000000000015,
+            "end": 47100.000000000015,
+            "word_end": true
+          },
+          {
+            "text": "a",
+            "begin": 47100.000000000015,
+            "end": 47440.00000000002,
+            "word_end": false
+          },
+          {
+            "text": "quí",
+            "begin": 47440.00000000002,
+            "end": 48800.00000000002,
+            "word_end": false
+          }
+        ],
+        "bg": []
+      },
+      {
+        "start": 49200.0,
+        "end": 52400.0,
+        "agent": "v1",
+        "approx": false,
+        "syllables": [
+          {
+            "text": "a",
+            "begin": 49200.0,
+            "end": 49600.0,
+            "word_end": true
+          },
+          {
+            "text": "la",
+            "begin": 49600.0,
+            "end": 50000.0,
+            "word_end": true
+          },
+          {
+            "text": "de",
+            "begin": 50000.0,
+            "end": 50400.0,
+            "word_end": false
+          },
+          {
+            "text": "ri",
+            "begin": 50400.0,
+            "end": 50800.0,
+            "word_end": false
+          },
+          {
+            "text": "va",
+            "begin": 50800.0,
+            "end": 52400.0,
+            "word_end": false
+          }
+        ],
+        "bg": []
+      }
+    ]
+  },
+  "cinematic": {
+    "schema": "marea.cinematic",
+    "version": 1,
+    "enabled": false,
+    "primary_video_id": "",
+    "opening_trim_ms": 0.0,
+    "auto_opening_trim": true,
+    "default_treatment": {
+      "opacity": 1.0,
+      "blur": 0.35,
+      "vignette": 0.45,
+      "grain": 0.08,
+      "saturation": 0.82,
+      "contrast": 0.92,
+      "dim": 0.32
+    },
+    "resources": {},
+    "intervals": []
+  },
+  "background": {
+    "schema": "marea.background",
+    "version": 1,
+    "source": "cover",
+    "video": null,
+    "video_size": 0,
+    "video_mtime_ns": 0,
+    "trim_in_ms": 0.0,
+    "trim_out_ms": 0.0,
+    "offset_ms": 0.0,
+    "loop": "repeat",
+    "fit": "cover",
+    "zoom": 1.0,
+    "pan_x": 0.0,
+    "pan_y": 0.0,
+    "dim": 0.25,
+    "blur": 0.0,
+    "saturation": 1.0,
+    "scrim": 0.0,
+    "cover_tint": 0.0
+  },
+  "editor": {}
+}
