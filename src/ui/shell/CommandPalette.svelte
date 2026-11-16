@@ -1,5 +1,6 @@
 <script lang="ts">
   import { matchesQuery } from '@/shared/text';
+  import { openDemo, openProjectFile, openTtml } from '../actions';
   import Icon from '../icons/Icon.svelte';
   import { i18n } from '../i18n.svelte';
   import { router } from '../router/router.svelte';
@@ -20,6 +21,9 @@
       toggleRail: () => {
         layout.toggleRail();
       },
+      openTtml: () => void openTtml(),
+      openProject: () => void openProjectFile(),
+      openDemo: () => void openDemo(),
     }),
   );
 

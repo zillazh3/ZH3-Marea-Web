@@ -55,6 +55,10 @@ export async function removeFile(path: readonly string[], name: string): Promise
  */
 export async function requestPersistence(): Promise<boolean> {
   if (typeof navigator === 'undefined' || !('storage' in navigator)) return false;
-  if (await navigator.storage.persisted()) return true;
-  return navigator.storage.persist();
+  try {
+    if (await navigator.storage.persisted()) return true;
+    return await navigator.storage.persist();
+  } catch {
+    return false; // only a hint: the app works the same when the browser declines or the call is blocked
+  }
 }

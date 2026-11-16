@@ -18,6 +18,9 @@ export interface CommandActions {
   navigate: (route: RouteId) => void;
   toggleTheme: () => void;
   toggleRail: () => void;
+  openTtml: () => void;
+  openProject: () => void;
+  openDemo: () => void;
 }
 
 const ROUTE_ICONS = {
@@ -65,6 +68,30 @@ export function buildCommands(m: Messages, actions: CommandActions): Command[] {
       run: () => {
         actions.navigate('search');
       },
+    },
+    {
+      id: 'open-ttml',
+      group: 'action',
+      label: m.palette.openTtml,
+      icon: 'file-up',
+      keywords: 'ttml lyrics letra abrir open archivo file',
+      run: actions.openTtml,
+    },
+    {
+      id: 'open-project',
+      group: 'action',
+      label: m.palette.openProject,
+      icon: 'file-up',
+      keywords: 'project proyecto marea json abrir open archivo file',
+      run: actions.openProject,
+    },
+    {
+      id: 'open-demo',
+      group: 'action',
+      label: m.palette.openDemo,
+      icon: 'play',
+      keywords: 'demo example ejemplo prueba try',
+      run: actions.openDemo,
     },
     {
       id: 'toggle-theme',
