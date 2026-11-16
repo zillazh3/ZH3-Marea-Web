@@ -1,0 +1,43 @@
+import { expect, test } from '@playwright/test';
+
+test('navigates between screens and keeps the URL in sync', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Inicio');
+
+  await page.getByRole('link', { name: 'Editor' }).click();
+  await expect(page).toHaveURL(/\/editor$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Editor');
+  await expect(page).toHaveTitle('Editor – ZH3 Marea');
+  await expect(page.getByRole('main')).toBeFocused();
+});
+
+test('opens a deep link directly', async ({ page }) => {
+  await page.goto('/ajustes');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ajustes');
+});
+
+test('sends an unknown path to home', async ({ page }) => {
+  await page.goto('/nope');
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Inicio');
+});
+
+test('applies the light theme tokens', async ({ page }) => {
+  await page.goto('/');
+  const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = 'light';
+  });
+  const light = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  expect(dark).not.toBe(light);
+});
+
+test.describe('english browser', () => {
+  test.use({ locale: 'en-US' });
+
+  test('detects the language from the browser', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Home');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  });
+});
