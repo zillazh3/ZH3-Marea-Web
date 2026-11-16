@@ -24,6 +24,7 @@ state library, date library.
 | `eslint`, `typescript-eslint`, `eslint-plugin-svelte` | Lint with strict-type-checked rules and layer import restrictions. |
 | `prettier`, `prettier-plugin-svelte` | Formatting. |
 | `vitest` | Unit and parity tests (Node, no DOM for engine code). |
+| `happy-dom` | DOM for the TTML parser tests (`DOMParser`), per file with `@vitest-environment`; the app itself uses the browser's. |
 | `@playwright/test` | E2E, visual baselines, export determinism check. |
 | `wrangler` | Deploy to Cloudflare Workers static assets. |
 

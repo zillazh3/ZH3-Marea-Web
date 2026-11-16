@@ -37,7 +37,11 @@ nothing for writing in that tree) and review the diff like code:
 <desktop>/.venv/Scripts/python.exe -B tools/export-fixtures.py --desktop <desktop>
 ```
 
-`--desktop` can be replaced by the `MAREA_DESKTOP` environment variable.
+`--desktop` can be replaced by the `MAREA_DESKTOP` environment variable. The same run also writes the lyrics parser, provider and
+`.marea.json` fixtures (`tests/fixtures/lyrics/`, `tests/fixtures/project/`).
+
+To check the other direction, that the desktop opens a project made by the web app, run the desktop interpreter on
+`tools/verify-desktop-load.py --desktop <desktop> <file.marea.json>` (writes nothing in the desktop tree).
 
 ## Layout
 
