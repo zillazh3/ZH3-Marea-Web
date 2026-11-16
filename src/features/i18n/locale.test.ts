@@ -26,7 +26,7 @@ describe('resolveLocale', () => {
 
 describe('messagesFor', () => {
   it('returns the dictionary of the locale', () => {
-    expect(messagesFor('en').nav.inicio).toBe('Home');
+    expect(messagesFor('en').nav.home).toBe('Home');
     expect(messagesFor('es-MX').app.documentTitle('Editor')).toBe('Editor – ZH3 Marea');
   });
 });
@@ -34,7 +34,7 @@ describe('messagesFor', () => {
 describe('Messages', () => {
   it('rejects a dictionary with a missing key at compile time', () => {
     // @ts-expect-error nav.label is required by the es-MX shape
-    const incomplete: Messages = { ...messagesFor('en'), nav: { inicio: 'Home' } };
-    expect(incomplete.nav.inicio).toBe('Home');
+    const incomplete: Messages = { ...messagesFor('en'), nav: { home: 'Home' } };
+    expect(incomplete.nav.home).toBe('Home');
   });
 });

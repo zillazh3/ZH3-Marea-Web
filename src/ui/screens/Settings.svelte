@@ -2,4 +2,4 @@
   import { i18n } from '../i18n.svelte';
 </script>
 
-<h1>{i18n.m.nav.biblioteca}</h1>
+<h1>{i18n.m.nav.settings}</h1>

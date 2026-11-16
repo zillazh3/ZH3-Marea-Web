@@ -4,6 +4,9 @@ test('navigates between screens and keeps the URL in sync', async ({ page }) => 
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Inicio');
 
+  await page.getByRole('link', { name: 'Biblioteca' }).click();
+  await expect(page).toHaveURL(/\/library$/);
+
   await page.getByRole('link', { name: 'Editor' }).click();
   await expect(page).toHaveURL(/\/editor$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Editor');
@@ -12,7 +15,7 @@ test('navigates between screens and keeps the URL in sync', async ({ page }) => 
 });
 
 test('opens a deep link directly', async ({ page }) => {
-  await page.goto('/ajustes');
+  await page.goto('/settings');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ajustes');
 });
 

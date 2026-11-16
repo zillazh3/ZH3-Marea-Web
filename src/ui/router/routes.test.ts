@@ -13,7 +13,7 @@ describe('routes', () => {
   });
 
   it('sends unknown paths to the home screen', () => {
-    expect(routeFromPath('/nope')).toBe('inicio');
-    expect(routeFromPath('')).toBe('inicio');
+    expect(routeFromPath('/nope')).toBe('home');
+    expect(routeFromPath('')).toBe('home');
   });
 });

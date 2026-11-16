@@ -4,21 +4,21 @@
   import Link from './router/Link.svelte';
   import { router } from './router/router.svelte';
   import { ROUTES, type RouteId } from './router/routes';
-  import Ajustes from './screens/Ajustes.svelte';
-  import Biblioteca from './screens/Biblioteca.svelte';
-  import Buscar from './screens/Buscar.svelte';
+  import Settings from './screens/Settings.svelte';
+  import Library from './screens/Library.svelte';
+  import Search from './screens/Search.svelte';
   import Callback from './screens/Callback.svelte';
   import Editor from './screens/Editor.svelte';
-  import Exportaciones from './screens/Exportaciones.svelte';
-  import Inicio from './screens/Inicio.svelte';
+  import Exports from './screens/Exports.svelte';
+  import Home from './screens/Home.svelte';
 
   const SCREENS: Record<RouteId, Component> = {
-    inicio: Inicio,
-    buscar: Buscar,
+    home: Home,
+    search: Search,
     editor: Editor,
-    biblioteca: Biblioteca,
-    exportaciones: Exportaciones,
-    ajustes: Ajustes,
+    library: Library,
+    exports: Exports,
+    settings: Settings,
     callback: Callback,
   };
 
