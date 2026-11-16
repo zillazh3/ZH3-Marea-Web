@@ -27,6 +27,18 @@ npm run dev        # http://127.0.0.1:5173
 
 The dev server binds `127.0.0.1` because Spotify does not accept `localhost` redirect URIs.
 
+## Parity fixtures
+
+The engine is checked against values recorded from the desktop app (`tests/fixtures/engine/`). They are committed, so tests need no
+Python. To regenerate them after an intentional engine change, run the generator with the desktop app's own interpreter (it opens
+nothing for writing in that tree) and review the diff like code:
+
+```sh
+<desktop>/.venv/Scripts/python.exe -B tools/export-fixtures.py --desktop <desktop>
+```
+
+`--desktop` can be replaced by the `MAREA_DESKTOP` environment variable.
+
 ## Layout
 
 ```
