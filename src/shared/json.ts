@@ -30,3 +30,10 @@ export function parseJson(text: string): unknown {
     return null;
   }
 }
+
+/** Python's `str(value)` for scalars; anything structured reads as empty rather than "[object Object]". */
+export function asText(value: unknown): string {
+  return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+    ? String(value)
+    : '';
+}
