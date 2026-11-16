@@ -1,14 +1,15 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type { HTMLAnchorAttributes } from 'svelte/elements';
   import { router } from './router.svelte';
   import { pathFor, type RouteId } from './routes';
 
-  interface Props {
+  interface Props extends Omit<HTMLAnchorAttributes, 'href' | 'children'> {
     route: RouteId;
     children: Snippet;
   }
 
-  const { route, children }: Props = $props();
+  const { route, children, ...rest }: Props = $props();
 
   function onclick(event: MouseEvent): void {
     // Let the browser handle new-tab and modified clicks.
@@ -20,6 +21,11 @@
   }
 </script>
 
-<a href={pathFor(route)} aria-current={router.current === route ? 'page' : undefined} {onclick}>
+<a
+  {...rest}
+  href={pathFor(route)}
+  aria-current={router.current === route ? 'page' : undefined}
+  {onclick}
+>
   {@render children()}
 </a>
