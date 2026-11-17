@@ -93,7 +93,8 @@ test.describe('export', () => {
   test('exports a clip from Editor to Exportaciones, downloads an MP4, and lists it in Library', async ({
     page,
   }) => {
-    test.setTimeout(120_000);
+    // CI runners encode in software and take about twice as long as a desktop GPU.
+    test.setTimeout(process.env.CI ? 300_000 : 120_000);
     await openDemoInEditor(page);
 
     // Narrow to verse 1 so the real 60 fps encode finishes briskly in headless Chromium.
@@ -117,7 +118,7 @@ test.describe('export', () => {
     await expect(page).toHaveURL(/\/app\/#exports$/);
 
     const downloadBtn = page.getByRole('button', { name: 'Descargar' });
-    await expect(downloadBtn).toBeVisible({ timeout: 90_000 });
+    await expect(downloadBtn).toBeVisible({ timeout: process.env.CI ? 240_000 : 90_000 });
     await expect(page.getByText(/Listo/)).toBeVisible();
 
     const downloadPromise = page.waitForEvent('download');
