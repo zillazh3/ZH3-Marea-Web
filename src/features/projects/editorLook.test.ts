@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { demoLyrics } from '@/features/lyrics/demo';
-import { clipRangeMs, restoreEditorState, serializeEditorState } from './editorLook';
+import {
+  LAST_LOOK_KEY,
+  clipRangeMs,
+  loadLastLook,
+  restoreEditorState,
+  saveLastLook,
+  serializeEditorState,
+} from './editorLook';
 import { newProject } from './project';
 
 describe('editorLook restore and serialize', () => {
@@ -39,5 +46,44 @@ describe('editorLook restore and serialize', () => {
     expect((serialized.fx as Record<string, unknown>).overrides).toEqual({ '3': ['luz'] });
     expect((serialized.style as Record<string, unknown>).wm_side).toBe('right');
     expect((serialized.params as Record<string, unknown>).wob).toBe(0.72);
+  });
+});
+
+describe('last look memory', () => {
+  const memory = (initial: Record<string, string> = {}) => {
+    const data = new Map(Object.entries(initial));
+    return {
+      getItem: (k: string) => data.get(k) ?? null,
+      setItem: (k: string, v: string) => void data.set(k, v),
+    };
+  };
+
+  it('stores the look without song-specific keys and applies it to a new project', () => {
+    const storage = memory();
+    saveLastLook(storage, {
+      first: 2,
+      last: 4,
+      audio_source: 'local',
+      style: { wm_side: 'right', wm_text: 'mine' },
+      fx: { overrides: { '3': ['luz'] }, fx_intensity: 0.5 },
+    });
+    const stored = loadLastLook(storage);
+    expect(stored.first).toBeUndefined();
+    expect(stored.audio_source).toBeUndefined();
+    expect(stored.fx).toEqual({ fx_intensity: 0.5 });
+
+    const project = newProject({ title: 'New', artist: 'B', lyrics: demoLyrics() });
+    project.editor = stored;
+    const restored = restoreEditorState(project, false);
+    expect(restored.look.style.wmSide).toBe('right');
+    expect(restored.look.style.wmText).toBe('mine');
+    expect(restored.look.style.title).toBe('New');
+    expect([restored.first, restored.last]).toEqual([0, 5]);
+  });
+
+  it('falls back to an empty look on missing or malformed storage', () => {
+    expect(loadLastLook(memory())).toEqual({});
+    expect(loadLastLook(memory({ [LAST_LOOK_KEY]: '{oops' }))).toEqual({});
+    expect(loadLastLook(memory({ [LAST_LOOK_KEY]: '[1]' }))).toEqual({});
   });
 });

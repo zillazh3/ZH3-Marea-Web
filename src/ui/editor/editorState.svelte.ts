@@ -28,7 +28,9 @@ import {
 import {
   clampVerseRange,
   clipRangeMs,
+  loadLastLook,
   restoreEditorState,
+  saveLastLook,
   serializeEditorState,
   type AudioSourceMode,
 } from '@/features/projects/editorLook';
@@ -71,6 +73,15 @@ const THUMB_H = 384;
 const THUMB_T_MS = 12_500;
 const SCRUB_THROTTLE_MS = 32;
 const SAVE_DEBOUNCE_MS = 400;
+
+/** Reading `localStorage` itself can throw when site data is blocked; the look then just isn't remembered. */
+function browserStorage(): Storage | null {
+  try {
+    return localStorage;
+  } catch {
+    return null;
+  }
+}
 
 function decodeBase64Bytes(b64: string): Uint8Array | null {
   if (!b64) return null;
@@ -165,6 +176,10 @@ export class EditorController {
     this.audioMissing = false;
     this.audioLoading = false;
 
+    const storage = browserStorage();
+    if (storage && Object.keys(project.editor).length === 0) {
+      project.editor = loadLastLook(storage);
+    }
     const restored = restoreEditorState(project, systemReducesMotion());
     this.first = restored.first;
     this.last = restored.last;
@@ -599,14 +614,33 @@ export class EditorController {
   }
 
   applyCorriente(entry: PresetEntry, sections: readonly PresetSection[]): void {
-    const nextLook = applyPreset(entry.preset, this.look, sections);
-    this.appliedPreset = entry.name;
-    this.look = nextLook;
-    this.configureWorker();
-    this.markDirty();
+    this.setLook(applyPreset(entry.preset, this.look, sections), entry.name);
     if (entry.missingFont) {
       notifications.show(i18n.m.editor.style.missingFont(entry.missingFont), 'info');
     }
+  }
+
+  private setLook(look: LookState, preset: string): void {
+    this.appliedPreset = preset;
+    this.look = look;
+    this.configureWorker();
+    this.markDirty();
+  }
+
+  /** Back to the default look for this song; verse range, audio and title/artist are kept. Undo is offered. */
+  resetLook(): void {
+    if (!this.project) return;
+    const { look } = restoreEditorState({ ...this.project, editor: {} }, systemReducesMotion());
+    const previous = { look: this.look, preset: this.appliedPreset };
+    this.setLook(look, '');
+    notifications.show(i18n.m.editor.resetDone, 'ok', {
+      action: {
+        label: i18n.m.editor.undo,
+        onClick: () => {
+          this.setLook(previous.look, previous.preset);
+        },
+      },
+    });
   }
 
   captureCurrentPreset(name: string, description = '') {
@@ -822,14 +856,23 @@ export class EditorController {
       audioSource: this.audioSource,
       preset: this.appliedPreset,
     });
-    if (!this.projectId) return;
     if (this.saveTimer !== null) clearTimeout(this.saveTimer);
-    const id = this.projectId;
-    const proj = this.project;
     this.saveTimer = setTimeout(() => {
-      this.saveTimer = null;
-      void projectStore.save(proj, id).then(() => library.refresh());
+      this.flushSave();
     }, SAVE_DEBOUNCE_MS);
+  }
+
+  /** Persists the pending edit (project + last-used look) now; also used on dispose so quick exits lose nothing. */
+  private flushSave(): void {
+    if (this.saveTimer !== null) {
+      clearTimeout(this.saveTimer);
+      this.saveTimer = null;
+    }
+    const proj = this.project;
+    if (!proj) return;
+    const storage = browserStorage();
+    if (storage) saveLastLook(storage, proj.editor);
+    if (this.projectId) void projectStore.save(proj, this.projectId).then(() => library.refresh());
   }
 
   dispose(): void {
@@ -840,10 +883,7 @@ export class EditorController {
       clearTimeout(this.scrubTimer);
       this.scrubTimer = null;
     }
-    if (this.saveTimer !== null) {
-      clearTimeout(this.saveTimer);
-      this.saveTimer = null;
-    }
+    if (this.saveTimer !== null) this.flushSave();
     this.client?.dispose();
     this.client = null;
     this.audioClock.dispose();

@@ -103,6 +103,34 @@ export function restoreEditorState(
   return { first, last, look, audioSource, preset };
 }
 
+export const LAST_LOOK_KEY = 'zh3marea.lastLook';
+
+/** Remembers the look (not the song-specific verse range, audio mode or per-verse fx overrides) for new projects. */
+export function saveLastLook(storage: Pick<Storage, 'setItem'>, editor: JsonObject): void {
+  const look: JsonObject = { ...editor };
+  const fxLook: JsonObject = isRecord(editor.fx) ? { ...editor.fx } : {};
+  delete look.first;
+  delete look.last;
+  delete look.audio_source;
+  delete fxLook.overrides;
+  try {
+    storage.setItem(LAST_LOOK_KEY, JSON.stringify({ ...look, fx: fxLook }));
+  } catch {
+    // Private mode / quota: the look then lasts only for this project.
+  }
+}
+
+/** Reads the remembered look; `restoreEditorState` sanitizes every field, so only the shape is checked here. */
+export function loadLastLook(storage: Pick<Storage, 'getItem'>): JsonObject {
+  try {
+    const text = storage.getItem(LAST_LOOK_KEY);
+    const raw: unknown = text === null ? null : JSON.parse(text);
+    return isRecord(raw) ? raw : {};
+  } catch {
+    return {};
+  }
+}
+
 /** Writes editor look back into `project.editor` (desktop snake_case) while preserving unknown keys. */
 export function serializeEditorState(
   existingEditor: JsonObject,

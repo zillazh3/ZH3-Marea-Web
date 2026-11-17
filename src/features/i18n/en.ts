@@ -31,6 +31,7 @@ export const en: Messages = {
   },
   player: {
     nothingPlaying: 'Nothing playing',
+    playOnSpotify: 'Play something on Spotify',
     connectSpotify: 'Connect Spotify',
     nowPlaying: 'Now playing',
     previous: 'Previous',
@@ -125,6 +126,9 @@ export const en: Messages = {
     rangeSummary: (first, last, duration) => `Lines ${String(first)}–${String(last)} · ${duration}`,
     extendRange: 'Extend range',
     tablistLabel: 'Clip settings',
+    resetLook: 'Reset to defaults',
+    resetDone: 'Settings reset',
+    undo: 'Undo',
     tabs: {
       style: 'Style',
       background: 'Background',

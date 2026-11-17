@@ -118,6 +118,13 @@
             <HooksTab {editor} {project} />
           {/if}
         </div>
+        <div class="reset-row">
+          <Button
+            onclick={() => {
+              editor.resetLook();
+            }}>{m.editor.resetLook}</Button
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -201,6 +208,14 @@
   .tablist button[aria-selected='true'] {
     color: var(--text);
     border-bottom-color: var(--accent);
+  }
+
+  .reset-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: var(--space-3) calc(-1 * var(--space-3)) 0;
+    padding: var(--space-3) var(--space-3) 0;
+    border-top: 1px solid var(--border);
   }
 
   @media (max-width: 980px) {

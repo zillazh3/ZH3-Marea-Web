@@ -31,6 +31,7 @@ export const esMX = {
   },
   player: {
     nothingPlaying: 'Nada sonando',
+    playOnSpotify: 'Pon algo en Spotify',
     connectSpotify: 'Conecta Spotify',
     nowPlaying: 'Sonando ahora',
     previous: 'Anterior',
@@ -126,6 +127,9 @@ export const esMX = {
       `Versos ${String(first)}–${String(last)} · ${duration}`,
     extendRange: 'Extender rango',
     tablistLabel: 'Ajustes del clip',
+    resetLook: 'Reiniciar por defecto',
+    resetDone: 'Ajustes restablecidos',
+    undo: 'Deshacer',
     tabs: {
       style: 'Estilo',
       background: 'Fondo',
