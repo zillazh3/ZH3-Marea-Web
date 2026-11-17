@@ -12,6 +12,7 @@ export default defineConfig(
       'dist',
       'node_modules',
       '.wrangler',
+      '.lighthouseci',
       'playwright-report',
       'test-results',
       'docs',

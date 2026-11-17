@@ -14,6 +14,7 @@ for (const size of SIZES) {
       await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
       await page.setViewportSize({ width: size.width, height: size.height });
       await page.goto('/app/?seed');
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       await expect(page).toHaveScreenshot(`shell-${size.name}-${colorScheme}.png`, {
         animations: 'disabled',

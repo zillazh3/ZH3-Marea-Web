@@ -66,8 +66,12 @@ function mountClipPhone(phone: HTMLElement, template: HTMLTemplateElement): Moun
     words.forEach((wordEval, index) => {
       const span = lineWords[index];
       if (!span) return;
-      span.style.setProperty('--progress', wordEval.progress.toFixed(3));
-      span.toggleAttribute('data-singing', wordEval.singing);
+      const formatted = wordEval.progress.toFixed(3);
+      if (span.dataset.lastProgress !== formatted) {
+        span.dataset.lastProgress = formatted;
+        span.style.setProperty('--progress', formatted);
+        span.toggleAttribute('data-singing', wordEval.singing);
+      }
     });
   }
 

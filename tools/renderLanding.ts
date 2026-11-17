@@ -66,10 +66,10 @@ function renderCorrienteCard(item: LandingCorriente, m: LandingMessages): string
   return `      <li data-preset="${item.slug}" data-reveal>
         <figure data-cover="${item.cover}"><p>${escapeHtml(line1)}</p><p>${escapeHtml(line2)}</p><p>${escapeHtml(line3)}</p><figcaption>${escapeHtml(item.name)}</figcaption></figure>
         <dl>
-          <dt>${escapeHtml(stats.brightness)}</dt><dd>${String(item.brightness)}</dd><meter max="100" value="${String(item.brightness)}"></meter>
-          <dt>${escapeHtml(stats.blur)}</dt><dd>${String(item.blur)}</dd><meter max="100" value="${String(item.blur)}"></meter>
-          <dt>${escapeHtml(stats.effects)}</dt><dd>${String(item.effects)}</dd><meter max="100" value="${String(item.effects)}"></meter>
-          <dt>${escapeHtml(stats.size)}</dt><dd>${String(item.size)}</dd><meter max="${String(item.sizeMax)}" value="${String(item.size)}"></meter>
+          <dt>${escapeHtml(stats.brightness)}</dt><dd>${String(item.brightness)}</dd><dd class="stat-meter"><meter max="100" value="${String(item.brightness)}" aria-label="${escapeHtml(stats.brightness)}"></meter></dd>
+          <dt>${escapeHtml(stats.blur)}</dt><dd>${String(item.blur)}</dd><dd class="stat-meter"><meter max="100" value="${String(item.blur)}" aria-label="${escapeHtml(stats.blur)}"></meter></dd>
+          <dt>${escapeHtml(stats.effects)}</dt><dd>${String(item.effects)}</dd><dd class="stat-meter"><meter max="100" value="${String(item.effects)}" aria-label="${escapeHtml(stats.effects)}"></meter></dd>
+          <dt>${escapeHtml(stats.size)}</dt><dd>${String(item.size)}</dd><dd class="stat-meter"><meter max="${String(item.sizeMax)}" value="${String(item.size)}" aria-label="${escapeHtml(stats.size)}"></meter></dd>
         </dl>
         <p>${escapeHtml(desc)}</p>
       </li>`;
