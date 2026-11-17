@@ -3,11 +3,20 @@
   import { i18n } from '../i18n.svelte';
   import { layout } from '../state/layout.svelte';
   import { player } from '../state/player.svelte';
+  import { spotifyStatus } from '../state/spotify.svelte';
   import Cover from './Cover.svelte';
   import { tip } from './tooltip.svelte';
 
   const m = $derived(i18n.m.player);
+  // The open clip wins (it has transport controls); otherwise show what Spotify is playing.
   const track = $derived(player.track);
+  const spotify = $derived(spotifyStatus.connected ? spotifyStatus.nowPlaying : null);
+  const title = $derived(track?.title ?? spotify?.track.title ?? null);
+  const subtitle = $derived(
+    track?.artist ??
+      spotify?.track.artist ??
+      (spotifyStatus.connected ? m.playOnSpotify : m.connectSpotify),
+  );
 </script>
 
 <div
@@ -16,7 +25,7 @@
   role="group"
   aria-label={m.nowPlaying}
   {@attach tip(
-    () => (track ? `${track.title}, ${track.artist}` : m.nothingPlaying),
+    () => (title ? `${title}, ${subtitle}` : m.nothingPlaying),
     () => layout.railCollapsed,
   )}
 >
@@ -24,13 +33,15 @@
     {#if track}
       <Cover tone={track.tone} />
       <i class="prog" style:width="{player.progress * 100}%"></i>
+    {:else if spotify?.track.coverUrl}
+      <img src={spotify.track.coverUrl} alt="" />
     {:else}
       <span class="empty"><Icon name="play" /></span>
     {/if}
   </div>
   <div class="meta">
-    <div class="t">{track ? track.title : m.nothingPlaying}</div>
-    <div class="a">{track ? track.artist : m.connectSpotify}</div>
+    <div class="t">{title ?? m.nothingPlaying}</div>
+    <div class="a">{subtitle}</div>
   </div>
   {#if track}
     <div class="ctl">
@@ -74,6 +85,12 @@
     height: 40px;
     border-radius: 9px;
     overflow: hidden;
+  }
+
+  .cv img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .empty {

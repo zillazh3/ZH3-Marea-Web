@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import {
     createFromSpotifyTrack,
     openDemo,
@@ -20,22 +19,10 @@
   const RECENT_COUNT = 12;
   /** Placeholder cover for the welcome card, until there is a song playing. */
   const WELCOME_TONE = 0;
-  const NOW_PLAYING_POLL_MS = 12_000;
 
   const m = $derived(i18n.m);
   const recent = $derived(library.items.slice(0, RECENT_COUNT));
   let openingNow = $state(false);
-
-  onMount(() => {
-    const timer = setInterval(() => {
-      if (spotifyStatus.connected && document.visibilityState === 'visible') {
-        void spotifyStatus.refreshNowPlaying();
-      }
-    }, NOW_PLAYING_POLL_MS);
-    return () => {
-      clearInterval(timer);
-    };
-  });
 
   async function openCurrentTrack(): Promise<void> {
     const track = spotifyStatus.nowPlaying?.track;

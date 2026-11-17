@@ -10,6 +10,7 @@ import { spotifyTokenStore } from '@/features/storage/spotifyTokens';
 import { isRecord, parseJson } from '@/shared/json';
 
 const PKCE_SESSION_KEY = 'zh3marea.spotify.pkce';
+const NOW_PLAYING_POLL_MS = 12_000;
 
 let clientId = $state('');
 let connected = $state(false);
@@ -79,6 +80,11 @@ export const spotifyStatus = {
         if (hasTok) connected = true;
         loaded = true;
         if (hasTok) void this.refreshNowPlaying();
+        const poll = (): void => {
+          if (connected && document.visibilityState === 'visible') void this.refreshNowPlaying();
+        };
+        setInterval(poll, NOW_PLAYING_POLL_MS);
+        document.addEventListener('visibilitychange', poll);
       } catch {
         loaded = true;
       }
