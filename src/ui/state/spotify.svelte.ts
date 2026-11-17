@@ -1,13 +1,12 @@
 import {
   SPOTIFY_CALLBACK_PATH,
   SpotifyClient,
-  parseStoredToken,
   type PendingPkce,
   type SpotifyPlayback,
-  type SpotifyToken,
   type SpotifyTrack,
 } from '@/features/providers/spotify';
 import { secrets } from '@/features/storage/secrets';
+import { spotifyTokenStore } from '@/features/storage/spotifyTokens';
 import { isRecord, parseJson } from '@/shared/json';
 
 const PKCE_SESSION_KEY = 'zh3marea.spotify.pkce';
@@ -22,10 +21,8 @@ let loadPromise: Promise<void> | null = null;
 
 const client = new SpotifyClient({
   clientId: () => clientId,
-  loadToken: async () => parseStoredToken(await secrets.get('spotifyToken')),
-  saveToken: async (token: SpotifyToken | null) => {
-    await secrets.set('spotifyToken', token ? JSON.stringify(token) : '');
-  },
+  loadToken: () => spotifyTokenStore.load(),
+  saveToken: (token) => spotifyTokenStore.save(token),
 });
 
 function readPendingPkce(): PendingPkce | null {
@@ -128,6 +125,11 @@ export const spotifyStatus = {
   },
   async disconnect(): Promise<void> {
     await client.disconnect();
+    try {
+      sessionStorage.removeItem(PKCE_SESSION_KEY);
+    } catch {
+      // Blocked storage holds no PKCE state to remove.
+    }
     connected = false;
     nowPlaying = null;
   },

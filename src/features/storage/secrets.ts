@@ -1,6 +1,12 @@
 import { appDb } from './db';
 
-export type SecretName = 'spicyKey' | 'spotifyClientId' | 'spotifyToken';
+/** `spotifyToken` is the legacy record that also held the access token; it is only read to migrate and then deleted. */
+export type SecretName = 'spicyKey' | 'spotifyClientId' | 'spotifyRefreshToken' | 'spotifyToken';
+
+export interface SecretStore {
+  get(name: SecretName): Promise<string>;
+  set(name: SecretName, value: string): Promise<void>;
+}
 
 /** Keys of this device, in IndexedDB. Settings says plainly that they are not encrypted. */
 export const secrets = {
