@@ -1,17 +1,31 @@
+# Cloudflare reads this file at deploy time; it is not served. Rules add up, so a more specific rule that needs a different
+# value first detaches the general one with "! Header-Name". Limits: 100 rules, one * per pattern. See docs/deploy.md.
+
+# Every page: the landing, the privacy pages and the 404 get the strict policy (no third-party origins at all).
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; connect-src 'self' https://lrclib.net https://api.spicylyrics.org https://accounts.spotify.com https://api.spotify.com https://i.scdn.co; img-src 'self' blob: data: https://i.scdn.co; worker-src 'self' blob:; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), hid=(), bluetooth=(), midi=(), display-capture=(), accelerometer=(), gyroscope=(), magnetometer=()
   Cross-Origin-Opener-Policy: same-origin
-  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Strict-Transport-Security: max-age=31536000
+  Cache-Control: no-cache
 
+# The app: WebAssembly (CanvasKit) needs 'wasm-unsafe-eval'; lyrics, Spotify and covers need their origins (see docs/privacy-and-storage.md).
+/app/*
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob: https://i.scdn.co; font-src 'self'; connect-src 'self' https://lrclib.net https://api.spicylyrics.org https://accounts.spotify.com https://api.spotify.com https://i.scdn.co; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+# Hashed build output (the only folder the build writes hashed files to). The Web Workers load from here and take their policy
+# from their own response, so they get the app policy; the landing's scripts and styles ignore it, their document's policy applies.
 /assets/*
+  ! Content-Security-Policy
+  ! Cache-Control
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data: blob: https://i.scdn.co; font-src 'self'; connect-src 'self' https://lrclib.net https://api.spicylyrics.org https://accounts.spotify.com https://api.spotify.com https://i.scdn.co; media-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   Cache-Control: public, max-age=31536000, immutable
 
-/app/sw.js
-  Cache-Control: no-cache
-
+# HTML, the service worker (/app/sw.js) and the manifest revalidate on every load through "Cache-Control: no-cache" from /*,
+# so an update reaches users at once. Only the manifest also needs its media type.
 /app/manifest.webmanifest
-  Cache-Control: no-cache
   Content-Type: application/manifest+json; charset=utf-8
