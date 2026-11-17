@@ -7,7 +7,7 @@ const TTM = 'http://www.w3.org/ns/ttml#metadata';
 const MAREA = 'https://zh3.marea/ns/ttml';
 
 /** A lyrics file is a few hundred KB at most; this stops a pathological file before it reaches the parser. */
-const MAX_CHARS = 5_000_000;
+export const MAX_TTML_CHARS = 5_000_000;
 
 // ---- DOM helpers with ElementTree semantics (text, tail, itertext) ----
 
@@ -223,7 +223,7 @@ function parseP(p: Element, agents: Map<string, string>): Line | null {
 const UNSAFE_DECLARATION = /<!(DOCTYPE|ENTITY)/i;
 
 export function parseTtml(source: string): Lyrics {
-  if (source.length > MAX_CHARS) throw new LyricsError('ttmlTooLarge');
+  if (source.length > MAX_TTML_CHARS) throw new LyricsError('ttmlTooLarge');
   if (UNSAFE_DECLARATION.test(source)) throw new LyricsError('ttmlUnsafe');
   const doc = new DOMParser().parseFromString(source, 'application/xml');
   const failure = doc.querySelector('parsererror');

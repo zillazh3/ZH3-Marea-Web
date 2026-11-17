@@ -1,5 +1,6 @@
 import { demoLyrics } from '@/features/lyrics/demo';
-import { parseTtml } from '@/features/lyrics/ttml';
+import { LyricsError } from '@/features/lyrics/errors';
+import { MAX_TTML_CHARS, parseTtml } from '@/features/lyrics/ttml';
 import { ProjectError } from '@/features/projects/errors';
 import { parseProjectText, serializeProject } from '@/features/projects/file';
 import { newProject, type ClipProject } from '@/features/projects/project';
@@ -16,6 +17,9 @@ import { library } from './state/library.svelte';
 import { session } from './state/session.svelte';
 import { spotifyStatus } from './state/spotify.svelte';
 import { notifications } from './state/toasts.svelte';
+
+/** A project is a few MB with a cover; this refuses a file before it is read into memory. */
+const MAX_PROJECT_BYTES = 32 * 1024 * 1024;
 
 const FILE_NAME_FORBIDDEN = /[\\/:*?"<>|]+/g;
 
@@ -58,6 +62,7 @@ export function openTtml(): Promise<void> {
   return attempt(async () => {
     const file = await pickFile('.ttml,.xml,application/ttml+xml');
     if (!file) return;
+    if (file.size > MAX_TTML_CHARS) throw new LyricsError('ttmlTooLarge');
     const lyrics = parseTtml(await readText(file));
     if (lyrics.lines.length === 0) throw new ProjectError('noLines');
     await openProject(
@@ -75,6 +80,7 @@ export function openProjectFile(): Promise<void> {
   return attempt(async () => {
     const file = await pickFile('.json,application/json');
     if (!file) return;
+    if (file.size > MAX_PROJECT_BYTES) throw new ProjectError('tooLarge');
     await openProject(parseProjectText(await readText(file)));
   });
 }

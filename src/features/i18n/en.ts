@@ -403,6 +403,7 @@ export const en: Messages = {
       badVersion: "I can't read that project's version.",
       unsupportedVersion: 'That project is from a newer version. Update ZH3 Marea.',
       badArtists: "The project's artist list isn't valid.",
+      tooLarge: 'That project file is too large.',
     },
     provider: {
       busy: (service) => `${service} is busy. Try again in a moment.`,

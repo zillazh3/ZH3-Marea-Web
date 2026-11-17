@@ -1,6 +1,7 @@
 import type { CanvasKit, Image, Surface } from 'canvaskit-wasm';
 import type { Params } from '@/engine/params';
 import type { FxPlanData, Rgb } from '@/engine/wordfx/fxtypes';
+import { isCoverSizeAllowed } from '@/shared/imageSize';
 import { createDemoCover } from './cover';
 import { dominantColors } from './palette';
 import { Scene, type LyricsWithCredit } from './scene';
@@ -36,7 +37,7 @@ function decodeCover(
   coverBytes: Uint8Array | null,
   demoLabel: boolean,
 ): Image {
-  if (coverBytes && coverBytes.byteLength > 0) {
+  if (coverBytes && coverBytes.byteLength > 0 && isCoverSizeAllowed(coverBytes)) {
     const decoded = ck.MakeImageFromEncoded(coverBytes);
     if (decoded) return decoded;
   }

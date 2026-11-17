@@ -39,6 +39,7 @@ import { presetStore } from '@/features/storage/presets';
 import { projectStore } from '@/features/storage/projects';
 import { PreviewClient } from '@/render/previewClient';
 import { defaultStyle } from '@/render/style';
+import { isCoverSizeAllowed } from '@/shared/imageSize';
 import { describeError } from '../errors';
 import { i18n } from '../i18n.svelte';
 import { exportQueue } from '../state/exportQueue.svelte';
@@ -77,7 +78,7 @@ function decodeBase64Bytes(b64: string): Uint8Array | null {
     const bin = atob(b64);
     const out = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i += 1) out[i] = bin.charCodeAt(i);
-    return out;
+    return isCoverSizeAllowed(out) ? out : null;
   } catch {
     return null;
   }

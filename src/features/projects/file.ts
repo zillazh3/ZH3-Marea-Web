@@ -20,6 +20,9 @@ import {
 // Reading and writing `.marea.json` (`marea.project` v1), compatible with the desktop app. Every field is validated at this
 // boundary: nothing downstream sees a shape it has not been promised.
 
+/** A cover is a few hundred KB; this bounds what an imported file can make the app decode. */
+const MAX_COVER_B64_CHARS = 12 * 1024 * 1024;
+
 const KNOWN_KEYS = new Set([
   'schema',
   'version',
@@ -173,11 +176,20 @@ export function readProject(raw: unknown): ClipProject {
     );
   }
 
+  if (typeof raw.cover_png_b64 === 'string' && raw.cover_png_b64.length > MAX_COVER_B64_CHARS)
+    throw new ProjectError('tooLarge', 'cover_png_b64');
   const lyrics = readLyrics(raw.lyrics ?? {});
   const audio = obj(isFalsy(raw.audio) ? {} : raw.audio, 'audio');
   const extra: JsonObject = {};
   for (const [key, value] of Object.entries(raw)) {
-    if (!KNOWN_KEYS.has(key)) extra[key] = value;
+    // defineProperty, not assignment: a "__proto__" key must stay an own property rather than set the prototype.
+    if (!KNOWN_KEYS.has(key))
+      Object.defineProperty(extra, key, {
+        value,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
   }
   return {
     title: asString(raw.title),

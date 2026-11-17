@@ -408,6 +408,7 @@ export const esMX = {
       badVersion: 'No entiendo la versión de ese proyecto.',
       unsupportedVersion: 'Ese proyecto es de una versión más nueva. Actualiza ZH3 Marea.',
       badArtists: 'La lista de artistas del proyecto no es válida.',
+      tooLarge: 'Ese archivo de proyecto es demasiado grande.',
     },
     provider: {
       busy: (service: string) => `${service} está ocupado. Intenta de nuevo en un momento.`,

@@ -10,7 +10,8 @@ export type ProjectErrorCode =
   | 'unsupportedSchema'
   | 'badVersion'
   | 'unsupportedVersion'
-  | 'badArtists';
+  | 'badArtists'
+  | 'tooLarge';
 
 /**
  * A `.marea.json` that cannot be opened. `where` is the path of the offending field (`lyrics.lines[2].start`) and `detail` the
