@@ -1,10 +1,11 @@
 import {
   buildClipLineSpec,
   CURRENT_CARD_PHASE_OFFSET_SECONDS,
-  CURRENT_DEMO_LINE_INPUT,
+  CURRENT_DEMO_LINE_BY_LOCALE,
   evaluateWrappedLineSyllables,
   SECONDS_PER_LINE,
 } from './clip-math';
+import { pageLocale } from './locale';
 import { applySyllableEvaluation, mountLineSyllables } from './syllable-dom';
 
 const CAROUSEL_GAP_PX = 18;
@@ -33,7 +34,7 @@ export function setupCurrentsCarousel(reduceMotion: boolean): void {
   ];
   if (activeParagraphs.length === 0) return;
 
-  const lineSpec = buildClipLineSpec(CURRENT_DEMO_LINE_INPUT, 0);
+  const lineSpec = buildClipLineSpec(CURRENT_DEMO_LINE_BY_LOCALE[pageLocale()], 0);
   const mountedCards = activeParagraphs.map((paragraph) =>
     mountLineSyllables(paragraph, lineSpec, 'current-syllable'),
   );

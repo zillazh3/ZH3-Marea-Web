@@ -1,4 +1,5 @@
 import { clamp, lineBlurPx, sampleSyllableMotion } from './curves';
+import type { LandingLocale } from './locale';
 import {
   computeSyllableWeight,
   normalizeWordKey,
@@ -8,19 +9,33 @@ import {
   type SyllableState,
 } from './story-math';
 
-export const DEMO_CLIP_INPUTS: readonly StoryLineInput[] = [
-  { syllables: 'Ba|jé a la o|ri|lla sin sa|ber na|dar' },
-  { syllables: 'y el a|gua me lla|mó por mi nom|bre', fx: 'agua:water' },
-  { syllables: 'ca|da o|la tra|e al|go que per|dí', fx: 'ola:water' },
-  { syllables: 'y se lo lle|va an|tes de en|ten|der|lo' },
-  { syllables: 'Si la ma|re|a su|be, dé|ja|la su|bir', fx: 'marea:water' },
-  { syllables: 'que la luz se que|de en el fon|do del mar', fx: 'luz:light, mar:water' },
-];
-
-export const CURRENT_DEMO_LINE_INPUT: StoryLineInput = {
-  syllables: 'Si la ma|re|a su|be, dé|ja|la su|bir',
-  fx: 'marea:water',
+export const DEMO_CLIP_INPUTS_BY_LOCALE: Record<LandingLocale, readonly StoryLineInput[]> = {
+  'es-MX': [
+    { syllables: 'Ba|jé a la o|ri|lla sin sa|ber na|dar' },
+    { syllables: 'y el a|gua me lla|mó por mi nom|bre', fx: 'agua:water' },
+    { syllables: 'ca|da o|la tra|e al|go que per|dí', fx: 'ola:water' },
+    { syllables: 'y se lo lle|va an|tes de en|ten|der|lo' },
+    { syllables: 'Si la ma|re|a su|be, dé|ja|la su|bir', fx: 'marea:water' },
+    { syllables: 'que la luz se que|de en el fon|do del mar', fx: 'luz:light, mar:water' },
+  ],
+  en: [
+    { syllables: 'I walked down to the shore but could not swim' },
+    { syllables: 'and the wa|ter called me by my name', fx: 'water:water' },
+    { syllables: 'ev|ery wave brings back some|thing I lost', fx: 'wave:water' },
+    { syllables: 'and takes it a|way be|fore I un|der|stand' },
+    { syllables: 'If the tide ris|es, let it rise', fx: 'tide:water' },
+    { syllables: 'let the light stay at the bot|tom of the sea', fx: 'light:light, sea:water' },
+  ],
 };
+
+export const CURRENT_DEMO_LINE_BY_LOCALE: Record<LandingLocale, StoryLineInput> = {
+  'es-MX': { syllables: 'Si la ma|re|a su|be, dé|ja|la su|bir', fx: 'marea:water' },
+  en: { syllables: 'If the tide ris|es, let it rise', fx: 'tide:water' },
+};
+
+/** The Spanish demo, kept as the default for the locale-agnostic helpers and tests. */
+export const DEMO_CLIP_INPUTS = DEMO_CLIP_INPUTS_BY_LOCALE['es-MX'];
+export const CURRENT_DEMO_LINE_INPUT = CURRENT_DEMO_LINE_BY_LOCALE['es-MX'];
 
 export const DEMO_LYRICS: readonly string[] = DEMO_CLIP_INPUTS.map((line) =>
   line.syllables.replaceAll('|', ''),

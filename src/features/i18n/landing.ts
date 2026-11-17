@@ -64,6 +64,8 @@ export interface LandingMessages {
     readonly hint: string;
     readonly verseTemplate: string;
     readonly initialVerse: string;
+    /** Showcase lyrics; `|` splits syllables, `fx` is a `word:effect` list. */
+    readonly lines: readonly { readonly syllables: string; readonly fx?: string }[];
     readonly closingText: string;
     readonly closingCta: string;
   };
@@ -191,6 +193,13 @@ export const landingEsMX: LandingMessages = {
     hint: 'Desliza despacio y canta con ella',
     verseTemplate: 'Verso {current} de {total}',
     initialVerse: 'Verso 1 de 5',
+    lines: [
+      { syllables: 'Bus|ca la can|ción que no te suel|tas,' },
+      { syllables: 'mar|ca los ver|sos que te due|len' },
+      { syllables: 'y de|ja que la ma|re|a los le|van|te,', fx: 'marea:water' },
+      { syllables: 'sí|la|ba por sí|la|ba,' },
+      { syllables: 'has|ta que bri|llen.', fx: 'brillen:light' },
+    ],
     closingText:
       'Así se mueve cada clip: la sílaba que suena se ilumina, la que viene espera, y algunas palabras brillan por lo que significan.',
     closingCta: 'Hacer el mío',
@@ -426,6 +435,13 @@ export const landingEn: LandingMessages = {
     hint: 'Scroll slowly and sing along',
     verseTemplate: 'Line {current} of {total}',
     initialVerse: 'Line 1 of 5',
+    lines: [
+      { syllables: "Find the song you can't let go," },
+      { syllables: 'mark the lines that hurt the most' },
+      { syllables: 'and let the tide lift them up,', fx: 'tide:water' },
+      { syllables: 'syl|la|ble by syl|la|ble,' },
+      { syllables: 'un|til they shine.', fx: 'shine:light' },
+    ],
     closingText:
       'That is how every clip moves: the active syllable lights up, upcoming lines wait, and certain words glow for what they mean.',
     closingCta: 'Make mine',

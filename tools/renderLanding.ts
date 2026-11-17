@@ -202,7 +202,7 @@ function renderFooter(m: LandingMessages, site: SiteConfig, otherLanguageHref: s
     <div class="footer-meta">
       <p>${escapeHtml(m.footer.disclaimer)}</p>
       <p><a href="${escapeHtml(m.footer.privacyHref)}">${escapeHtml(m.footer.privacyLink)}</a></p>
-      <p>${escapeHtml(m.footer.languageLabel)} <a href="${escapeHtml(otherLanguageHref)}" hreflang="${escapeHtml(m.footer.otherLanguageCode)}" lang="${escapeHtml(m.footer.otherLanguageCode)}">${escapeHtml(m.footer.otherLanguageName)}</a></p>
+      <p>${escapeHtml(m.footer.languageLabel)} <a href="${escapeHtml(otherLanguageHref)}" data-locale-choice="${escapeHtml(m.footer.otherLanguageCode)}" hreflang="${escapeHtml(m.footer.otherLanguageCode)}" lang="${escapeHtml(m.footer.otherLanguageCode)}">${escapeHtml(m.footer.otherLanguageName)}</a></p>
     </div>
   </div>
 </footer>`;
@@ -334,6 +334,12 @@ export function renderLandingHtml(
   const calloutsHtml = m.hero.callouts
     .map((label) => `          <li>${escapeHtml(label)}</li>`)
     .join('\n');
+  const storyLinesHtml = m.story.lines
+    .map((line) => {
+      const fx = line.fx ? ` data-fx="${escapeHtml(line.fx)}"` : '';
+      return `            <p data-syllables="${escapeHtml(line.syllables)}"${fx}>${escapeHtml(line.syllables.replaceAll('|', ''))}</p>`;
+    })
+    .join('\n');
   const corrientesHtml = LANDING_CORRIENTES.map((item) => renderCorrienteCard(item, m)).join('\n');
   const head = renderHead(
     m,
@@ -413,11 +419,7 @@ ${calloutsHtml}
         </header>
         <div class="lyrics">
           <div>
-            <p data-syllables="Bus|ca la can|ción que no te suel|tas,">Busca la canción que no te sueltas,</p>
-            <p data-syllables="mar|ca los ver|sos que te due|len">marca los versos que te duelen</p>
-            <p data-syllables="y de|ja que la ma|re|a los le|van|te," data-fx="marea:water">y deja que la marea los levante,</p>
-            <p data-syllables="sí|la|ba por sí|la|ba,">sílaba por sílaba,</p>
-            <p data-syllables="has|ta que bri|llen." data-fx="brillen:light">hasta que brillen.</p>
+${storyLinesHtml}
           </div>
         </div>
         <div class="story-closing">

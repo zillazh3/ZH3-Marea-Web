@@ -1,11 +1,13 @@
 import {
   buildClipLines,
   CLIP_TRACK_CENTER_RATIO,
+  DEMO_CLIP_INPUTS_BY_LOCALE,
   evaluateClipFrame,
   PHONE_PHASE_OFFSET_SECONDS,
   REDUCED_MOTION_PREVIEW_LINE_FACTOR,
   SECONDS_PER_LINE,
 } from './clip-math';
+import { pageLocale } from './locale';
 import {
   applySyllableEvaluation,
   mountLineSyllables,
@@ -23,7 +25,7 @@ function mountClipPhone(phone: HTMLElement, template: HTMLTemplateElement): Moun
   const list = clipRoot.querySelector<HTMLOListElement>('ol');
   if (!list) return null;
 
-  const lineSpecs = buildClipLines();
+  const lineSpecs = buildClipLines(DEMO_CLIP_INPUTS_BY_LOCALE[pageLocale()]);
   const mountedLines: { item: HTMLLIElement; syllables: MountedSyllableDom[] }[] = lineSpecs.map(
     (spec) => {
       const item = document.createElement('li');

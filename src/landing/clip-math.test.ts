@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   buildClipLines,
   buildClipLineSpec,
+  CURRENT_DEMO_LINE_BY_LOCALE,
   CURRENT_DEMO_LINE_INPUT,
   DEMO_CLIP_INPUTS,
+  DEMO_CLIP_INPUTS_BY_LOCALE,
   DEMO_LYRICS,
   evaluateClipFrame,
   evaluateWrappedLineSyllables,
@@ -31,6 +33,16 @@ describe('clip-math', () => {
       're',
       'a',
     ]);
+  });
+
+  it('ships an English demo with the same shape and its own wordfx markers', () => {
+    const en = DEMO_CLIP_INPUTS_BY_LOCALE.en;
+    expect(en).toHaveLength(DEMO_CLIP_INPUTS.length);
+    const lines = buildClipLines(en);
+    expect(lines[4]?.syllables.filter((s) => s.effect === 'water').map((s) => s.text)).toEqual([
+      'tide',
+    ]);
+    expect(buildClipLineSpec(CURRENT_DEMO_LINE_BY_LOCALE.en, 0).text).toBe(lines[4]?.text);
   });
 
   it('evaluates syllable wipe, lift/scale motion, smooth glow, and distance blur across the loop', () => {

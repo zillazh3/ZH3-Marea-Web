@@ -32,7 +32,9 @@ describe('landing build-time rendering and single source of truth', () => {
 
     expect(enHtml).toContain('<html lang="en">');
     expect(enHtml).toContain('href="/app/"');
-    expect(enHtml).toContain('Busca la canción que no te sueltas');
+    expect(enHtml).toContain('until they shine.');
+    expect(enHtml).not.toContain('Busca la canción');
+    expect(esHtml).toContain('hasta que brillen.');
     expect(enHtml).toContain('Bajamar');
     expect(enHtml).toContain('hreflang="es-MX"');
     expect(enHtml).toContain('Español');
