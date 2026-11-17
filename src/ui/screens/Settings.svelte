@@ -7,10 +7,12 @@
   import Switch from '../components/Switch.svelte';
   import { describeError } from '../errors';
   import { i18n } from '../i18n.svelte';
+  import { configuredSourceUrl } from '../sourceUrl';
   import { spicy } from '../services';
   import { layout } from '../state/layout.svelte';
   import { preferences } from '../state/preferences.svelte';
   import { spicyKey } from '../state/spicyKey.svelte';
+  import { spotifyRedirectUri, spotifyStatus } from '../state/spotify.svelte';
   import { notifications } from '../state/toasts.svelte';
 
   const m = $derived(i18n.m);
@@ -30,11 +32,50 @@
 
   let keyDraft = $state(spicyKey.value);
   let testing = $state(false);
+  let clientIdDraft = $state(spotifyStatus.clientId);
+  let connectingSpotify = $state(false);
+  const redirectUri = spotifyRedirectUri();
+  const sourceUrl = configuredSourceUrl();
 
   // The stored key arrives after the first paint; show it unless the user already started typing.
   $effect(() => {
     if (keyDraft === '') keyDraft = spicyKey.value;
   });
+
+  $effect(() => {
+    if (clientIdDraft === '') clientIdDraft = spotifyStatus.clientId;
+  });
+
+  async function saveSpotifyClientId(): Promise<void> {
+    await spotifyStatus.saveClientId(clientIdDraft);
+    clientIdDraft = spotifyStatus.clientId;
+  }
+
+  async function connectSpotify(): Promise<void> {
+    connectingSpotify = true;
+    try {
+      await saveSpotifyClientId();
+      const url = await spotifyStatus.startConnect('settings');
+      location.assign(url);
+    } catch (error) {
+      notifications.show(describeError(i18n.m, error), 'error');
+      connectingSpotify = false;
+    }
+  }
+
+  async function disconnectSpotify(): Promise<void> {
+    await spotifyStatus.disconnect();
+    notifications.show(m.settings.spotifyDisconnectedToast);
+  }
+
+  async function copyRedirectUri(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(redirectUri);
+      notifications.show(m.settings.spotifyCopied, 'ok');
+    } catch {
+      notifications.show(m.errors.unknown, 'error');
+    }
+  }
 
   async function saveKey(): Promise<boolean> {
     const previous = spicyKey.value;
@@ -129,6 +170,76 @@
       </Button>
     </div>
   </section>
+
+  <section class="card">
+    <h2>{m.settings.spotifyTitle}</h2>
+    <p class="hint">{m.settings.spotifyIntro}</p>
+    <div class="field">
+      <label class="label" for="spotify-client-id">{m.settings.spotifyClientId}</label>
+      <input
+        id="spotify-client-id"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder={m.settings.spotifyClientIdPlaceholder}
+        bind:value={clientIdDraft}
+        onchange={() => void saveSpotifyClientId()}
+      />
+    </div>
+    <div class="row">
+      <span class="hint">
+        {spotifyStatus.connected
+          ? m.settings.spotifyStatusConnected
+          : m.settings.spotifyStatusDisconnected}
+      </span>
+      <div class="btn-row">
+        {#if spotifyStatus.connected}
+          <Button onclick={() => void disconnectSpotify()}>{m.settings.spotifyDisconnect}</Button>
+        {/if}
+        <Button
+          variant="primary"
+          disabled={connectingSpotify}
+          onclick={() => void connectSpotify()}
+        >
+          {connectingSpotify ? m.settings.spotifyConnecting : m.settings.spotifyConnect}
+        </Button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label" for="spotify-redirect-uri">{m.settings.spotifyRedirectUri}</label>
+      <div class="uri-row">
+        <input id="spotify-redirect-uri" type="text" readonly value={redirectUri} />
+        <Button onclick={() => void copyRedirectUri()}>{m.settings.spotifyCopy}</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>{m.settings.experimentalTitle}</h2>
+    <div class="row">
+      <span>{m.settings.wordfxLabel}</span>
+      <Switch
+        checked={preferences.value.wordfxExperimental}
+        label={m.settings.wordfxLabel}
+        onchange={(wordfxExperimental: boolean) => {
+          preferences.update({ wordfxExperimental });
+        }}
+      />
+    </div>
+    <p class="hint">{m.settings.wordfxHint}</p>
+  </section>
+
+  {#if sourceUrl}
+    <section class="card">
+      <h2>{m.settings.aboutTitle}</h2>
+      <p class="hint">{m.settings.sourceCodeHint}</p>
+      <div>
+        <a class="source-link" href={sourceUrl} target="_blank" rel="noopener noreferrer">
+          {m.settings.sourceCode}
+        </a>
+      </div>
+    </section>
+  {/if}
 </div>
 
 <style>
@@ -206,5 +317,35 @@
   input:focus,
   select:focus {
     border-color: var(--accent);
+  }
+
+  .btn-row,
+  .uri-row {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+  }
+
+  .uri-row input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .source-link {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    padding: 0 var(--space-3);
+    border-radius: var(--r-ctl);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: var(--fs-sm);
+    text-decoration: none;
+  }
+
+  .source-link:hover {
+    background: var(--hover);
+    border-color: var(--accent-icon);
   }
 </style>

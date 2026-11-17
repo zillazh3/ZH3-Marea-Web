@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { SvelteMap } from 'svelte/reactivity';
   import { trackKind, type LrclibTrack } from '@/features/providers/lrclib';
+  import type { SpotifyTrack } from '@/features/providers/spotify';
   import { toneFor } from '@/features/storage/meta';
-  import { createFromTrack } from '../actions';
+  import { createFromSpotifyTrack, createFromTrack } from '../actions';
   import Badge from '../components/Badge.svelte';
   import Button from '../components/Button.svelte';
   import Empty from '../components/Empty.svelte';
@@ -11,6 +13,8 @@
   import Icon from '../icons/Icon.svelte';
   import { lrclib } from '../services';
   import Cover from '../shell/Cover.svelte';
+  import { spicyKey } from '../state/spicyKey.svelte';
+  import { spotifyStatus } from '../state/spotify.svelte';
 
   /** Wait for a pause in typing so each keystroke does not become a request. */
   const DEBOUNCE_MS = 350;
@@ -18,20 +22,39 @@
   /** Songs with syllable timing first, then line timing, then the ones without lyrics. */
   const KIND_RANK = { syllable: 0, line: 1, none: 2 } as const;
 
+  type UnifiedTrack =
+    | {
+        readonly source: 'spotify';
+        readonly key: string;
+        readonly track: SpotifyTrack;
+        readonly badgeKind: 'syllable' | 'line' | 'none' | null;
+      }
+    | {
+        readonly source: 'lrclib';
+        readonly key: string;
+        readonly track: LrclibTrack;
+        readonly badgeKind: 'syllable' | 'line' | 'none';
+      };
+
   type Status =
     | { kind: 'idle' }
     | { kind: 'loading' }
-    | { kind: 'done'; tracks: readonly LrclibTrack[] }
+    | { kind: 'done'; items: readonly UnifiedTrack[]; fallbackNote: string }
     | { kind: 'failed'; message: string };
+
+  function normKey(title: string, artist: string): string {
+    return `${title.trim().toLowerCase()}|${artist.split(',')[0]?.trim().toLowerCase() ?? ''}`;
+  }
 
   const m = $derived(i18n.m);
   let query = $state('');
   let status = $state.raw<Status>({ kind: 'idle' });
-  /** Id of the track whose lyrics are being opened, so its button cannot be pressed twice. */
-  let opening = $state<number | null>(null);
+  /** Key of the track whose lyrics are being opened, so its button cannot be pressed twice. */
+  let opening = $state<string | null>(null);
 
   $effect(() => {
     const text = query.trim();
+    const useSpotify = spotifyStatus.connected;
     if (text.length < MIN_QUERY_LENGTH) {
       status = { kind: 'idle' };
       return;
@@ -39,16 +62,65 @@
     status = { kind: 'loading' };
     let stale = false;
     const timer = setTimeout(() => {
-      lrclib.search(text).then(
-        (found) => {
+      if (!useSpotify) {
+        lrclib.search(text).then(
+          (found) => {
+            if (stale) return;
+            const items: UnifiedTrack[] = found
+              .toSorted((a, b) => KIND_RANK[trackKind(a)] - KIND_RANK[trackKind(b)])
+              .map((track) => ({
+                source: 'lrclib',
+                key: `lrc-${String(track.id)}`,
+                track,
+                badgeKind: trackKind(track),
+              }));
+            status = { kind: 'done', items, fallbackNote: '' };
+          },
+          (error: unknown) => {
+            if (!stale) status = { kind: 'failed', message: describeError(i18n.m, error) };
+          },
+        );
+        return;
+      }
+
+      void Promise.allSettled([spotifyStatus.search(text), lrclib.search(text)]).then(
+        ([spRes, lrcRes]) => {
           if (stale) return;
-          const tracks = found.toSorted(
-            (a, b) => KIND_RANK[trackKind(a)] - KIND_RANK[trackKind(b)],
-          );
-          status = { kind: 'done', tracks };
-        },
-        (error: unknown) => {
-          if (!stale) status = { kind: 'failed', message: describeError(i18n.m, error) };
+          const lrcTracks = lrcRes.status === 'fulfilled' ? lrcRes.value : [];
+          if (spRes.status === 'fulfilled') {
+            const byKey = new SvelteMap<string, LrclibTrack>();
+            for (const lt of lrcTracks) {
+              const k = normKey(lt.trackName, lt.artistName);
+              const prev = byKey.get(k);
+              if (!prev || KIND_RANK[trackKind(lt)] < KIND_RANK[trackKind(prev)]) {
+                byKey.set(k, lt);
+              }
+            }
+            const items: UnifiedTrack[] = spRes.value.map((track) => {
+              const matched = byKey.get(normKey(track.title, track.artist));
+              return {
+                source: 'spotify',
+                key: `sp-${track.id}`,
+                track,
+                badgeKind: matched ? trackKind(matched) : null,
+              };
+            });
+            status = { kind: 'done', items, fallbackNote: '' };
+            return;
+          }
+          if (lrcRes.status === 'fulfilled') {
+            const items: UnifiedTrack[] = lrcTracks
+              .toSorted((a, b) => KIND_RANK[trackKind(a)] - KIND_RANK[trackKind(b)])
+              .map((track) => ({
+                source: 'lrclib',
+                key: `lrc-${String(track.id)}`,
+                track,
+                badgeKind: trackKind(track),
+              }));
+            status = { kind: 'done', items, fallbackNote: i18n.m.search.spotifyFallback };
+            return;
+          }
+          status = { kind: 'failed', message: describeError(i18n.m, spRes.reason) };
         },
       );
     }, DEBOUNCE_MS);
@@ -58,14 +130,21 @@
     };
   });
 
-  async function create(track: LrclibTrack): Promise<void> {
-    opening = track.id;
-    await createFromTrack(track);
+  async function create(item: UnifiedTrack): Promise<void> {
+    opening = item.key;
+    if (item.source === 'spotify') {
+      await createFromSpotifyTrack(item.track);
+    } else {
+      await createFromTrack(item.track);
+    }
     opening = null;
   }
 </script>
 
-<ScreenHead title={m.nav.search} subtitle={m.search.subtitle} />
+<ScreenHead
+  title={m.nav.search}
+  subtitle={spotifyStatus.connected ? m.search.subtitleSpotify : m.search.subtitle}
+/>
 
 <div class="search-box">
   <Icon name="search" />
@@ -85,24 +164,43 @@
     <p class="note">{m.search.searching}</p>
   {:else if status.kind === 'failed'}
     <p class="note" role="alert">{status.message}</p>
-  {:else if status.tracks.length === 0}
+  {:else if status.items.length === 0}
     <Empty title={m.search.emptyTitle} hint={m.search.emptyHint} />
   {:else}
-    {#each status.tracks as track (track.id)}
-      {@const kind = trackKind(track)}
+    {#if status.fallbackNote}
+      <p class="note">{status.fallbackNote}</p>
+    {/if}
+    {#each status.items as item (item.key)}
+      {@const title = item.source === 'spotify' ? item.track.title : item.track.trackName}
+      {@const artist = item.source === 'spotify' ? item.track.artist : item.track.artistName}
+      {@const coverUrl = item.source === 'spotify' ? item.track.coverUrl : null}
+      {@const disabled =
+        opening !== null ||
+        (item.source === 'lrclib' && item.badgeKind === 'none') ||
+        (item.source === 'spotify' && item.badgeKind === 'none' && !spicyKey.value)}
       <div class="result">
-        <div class="art"><Cover tone={toneFor(track.trackName, track.artistName)} /></div>
-        <div class="text">
-          <div class="title">{track.trackName}</div>
-          <div class="artist">{track.artistName}</div>
+        <div class="art">
+          {#if coverUrl}
+            <img src={coverUrl} alt="" />
+          {:else}
+            <Cover tone={toneFor(title, artist)} />
+          {/if}
         </div>
-        <Badge {kind} label={m.search.kind[kind]} />
+        <div class="text">
+          <div class="title">{title}</div>
+          <div class="artist">{artist}</div>
+        </div>
+        {#if item.badgeKind}
+          <Badge kind={item.badgeKind} label={m.search.kind[item.badgeKind]} />
+        {:else}
+          <span class="sp-pill">{m.search.spotifyBadge}</span>
+        {/if}
         <Button
-          disabled={kind === 'none' || opening !== null}
-          title={kind === 'none' ? m.search.noSyncedLyrics : undefined}
-          onclick={() => void create(track)}
+          {disabled}
+          title={item.badgeKind === 'none' && !spicyKey.value ? m.search.noSyncedLyrics : undefined}
+          onclick={() => void create(item)}
         >
-          {opening === track.id ? m.search.fetching : m.search.createClip}
+          {opening === item.key ? m.search.fetching : m.search.createClip}
         </Button>
       </div>
     {/each}
@@ -171,6 +269,21 @@
     height: 48px;
     border-radius: 8px;
     overflow: hidden;
+  }
+
+  .art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .sp-pill {
+    font-size: var(--fs-xs);
+    color: var(--ok);
+    background: var(--pill);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
   }
 
   .title {

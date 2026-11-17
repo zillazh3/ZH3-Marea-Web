@@ -4,14 +4,17 @@ import { ProjectError } from '@/features/projects/errors';
 import { parseProjectText, serializeProject } from '@/features/projects/file';
 import { newProject, type ClipProject } from '@/features/projects/project';
 import { trackToLyrics, type LrclibTrack } from '@/features/providers/lrclib';
+import type { SpotifyTrack } from '@/features/providers/spotify';
 import { requestPersistence } from '@/features/storage/opfs';
 import { projectStore } from '@/features/storage/projects';
-import { downloadText, pickFile, readText } from './files';
 import { describeError } from './errors';
+import { downloadText, pickFile, readText } from './files';
 import { i18n } from './i18n.svelte';
 import { router } from './router/router.svelte';
+import { lyricsChain } from './services';
 import { library } from './state/library.svelte';
 import { session } from './state/session.svelte';
+import { spotifyStatus } from './state/spotify.svelte';
 import { notifications } from './state/toasts.svelte';
 
 const FILE_NAME_FORBIDDEN = /[\\/:*?"<>|]+/g;
@@ -86,6 +89,68 @@ export function openSaved(id: string): Promise<void> {
     }
     session.open(project, id);
     router.navigate('editor');
+  });
+}
+
+async function rasterBytesToPngBase64(bytes: Uint8Array): Promise<string> {
+  const bmp = await createImageBitmap(new Blob([bytes.slice().buffer]));
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = bmp.width;
+    canvas.height = bmp.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+    ctx.drawImage(bmp, 0, 0);
+    const pngBlob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/png');
+    });
+    if (!pngBlob) return '';
+    const pngBytes = new Uint8Array(await pngBlob.arrayBuffer());
+    let bin = '';
+    for (const byte of pngBytes) bin += String.fromCharCode(byte);
+    return btoa(bin);
+  } finally {
+    bmp.close();
+  }
+}
+
+export function createFromSpotifyTrack(track: SpotifyTrack): Promise<void> {
+  return attempt(async () => {
+    const [lyrics, coverPngB64] = await Promise.all([
+      lyricsChain.fetch({
+        title: track.title,
+        artist: track.artist,
+        durationMs: track.durationMs,
+        spotifyId: track.id,
+      }),
+      track.coverUrl
+        ? spotifyStatus
+            .fetchCoverBytes(track.coverUrl)
+            .then(rasterBytesToPngBase64)
+            .catch(() => '')
+        : Promise.resolve(''),
+    ]);
+    if (!lyrics) {
+      notifications.show(i18n.m.search.lyricsNotFound);
+      return;
+    }
+    await openProject(
+      newProject({
+        title: track.title,
+        artist: track.artist,
+        track: {
+          id: track.id,
+          title: track.title,
+          artists: [...track.artists],
+          album: track.album,
+          durationMs: track.durationMs,
+          coverUrl: track.coverUrl,
+          uri: track.uri,
+        },
+        coverPngB64,
+        lyrics,
+      }),
+    );
   });
 }
 

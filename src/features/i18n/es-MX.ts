@@ -62,9 +62,16 @@ export const esMX = {
     recents: 'Proyectos recientes',
     recentsEmpty: 'Aquí aparecerán tus proyectos en cuanto abras una letra.',
     openProjectAria: (title: string) => `Abrir ${title}`,
+    spotifyNowTitle: 'Sonando en Spotify',
+    spotifyIdle: 'No hay ninguna canción sonando en Spotify ahora mismo.',
+    spotifyOpenInEditor: 'Abrir en Editor',
+    spotifyRefresh: 'Actualizar',
+    spotifyPlaying: 'Reproduciendo',
+    spotifyPaused: 'En pausa',
   },
   search: {
     subtitle: 'Verás qué letra hay disponible antes de abrirla',
+    subtitleSpotify: 'Conectado a Spotify: resultados con portada e ID de canción',
     label: 'Buscar canción',
     placeholder: 'Busca una canción por título o artista',
     prompt: 'Escribe un título o un artista para ver qué letra hay disponible.',
@@ -76,10 +83,12 @@ export const esMX = {
       line: 'Letra por línea',
       none: 'Sin letra sincronizada',
     },
+    spotifyBadge: 'Spotify',
     createClip: 'Crear clip',
     noSyncedLyrics: 'Esta canción no tiene letra sincronizada',
     fetching: 'Buscando la letra…',
     lyricsNotFound: 'No encontré letra sincronizada para esa canción.',
+    spotifyFallback: 'No pude consultar Spotify; te muestro resultados de LRCLIB.',
   },
   library: {
     filterLabel: 'Filtrar biblioteca',
@@ -119,6 +128,7 @@ export const esMX = {
       background: 'Fondo',
       audio: 'Audio',
       watermark: 'Marca de agua',
+      hooks: 'Anzuelo',
     },
     style: {
       presets: 'Corrientes',
@@ -172,6 +182,46 @@ export const esMX = {
       motionAmt: 'Expresividad',
       font: 'Fuente',
       fontValue: 'Inter Tight (incluida)',
+      fxIntensity: 'Intensidad FX',
+      fxAdaptBg: 'Adaptar color de efectos al fondo',
+      fxDebug: 'Depurar efectos por palabra',
+    },
+    hooks: {
+      targetLabel: 'Duración objetivo',
+      secChip: (seconds: number) => `${String(seconds)} s`,
+      custom: 'A medida',
+      customSecLabel: 'Duración personalizada (segundos)',
+      suggest: 'Sugerir rangos',
+      analyzing: 'Analizando…',
+      emptyHint: 'Elige una duración y pulsa «Sugerir rangos».',
+      rerunHint: 'Pulsa «Sugerir rangos» otra vez para calcular esa duración.',
+      noAudioNote: 'Solo con letra (carga el audio para mayor precisión).',
+      noResults: 'No encontré tramos en esa duración.',
+      count: (n: number, suffix: string) =>
+        `${String(n)} ${n === 1 ? 'sugerencia' : 'sugerencias'}${suffix ? ` · ${suffix}` : ''}`,
+      versesRange: (first: number, last: number, span: string) =>
+        `Versos ${String(first)}–${String(last)} · ${span}`,
+      meta: (secs: number, score: number, confidence: string) =>
+        `${String(secs)} s · puntaje ${String(score)} · confianza ${confidence}`,
+      confidence: {
+        high: 'alta',
+        medium: 'media',
+        low: 'baja',
+      },
+      reasons: {
+        chorusRepeat: (count: number) => `coro repetido ${String(count)}×`,
+        lineRepeat: (count: number) => `verso que se repite ${String(count)}×`,
+        mentionsTitle: () => 'menciona el título',
+        vocalPeak: (timeLabel: string) => `pico vocal en ${timeLabel}`,
+        energyEntry: () => 'entra con subida de energía',
+        goodDuration: () => 'tramo completo con buena duración',
+      },
+      queue: 'Encolar',
+      variants: 'Encolar variantes…',
+      variantsPrompt: 'Una exportación por cada Corriente elegida:',
+      variantsConfirm: 'Agregar a la cola',
+      variantsCancel: 'Cancelar',
+      variantsQueued: (count: number) => `${String(count)} exportaciones añadidas a la cola.`,
     },
     background: {
       title: 'Título',
@@ -211,6 +261,70 @@ export const esMX = {
       alpha: 'Opacidad',
       hint: 'Queda fuera de la zona que tapa la interfaz de TikTok, entra con un fundido de 0.6 s y baja su opacidad si cruza la línea que se está cantando.',
     },
+    exportBar: {
+      modeLabel: 'Modo de exportación',
+      modes: {
+        lyrics: 'Solo letra',
+        song: 'Con canción',
+        full: 'Canción completa',
+      },
+      formatLabel: 'Formato',
+      formats: {
+        tiktok: 'TikTok 1080×1920',
+        square: 'Cuadrado 1080×1080',
+        wide: 'Horizontal 1920×1080',
+      },
+      resolutions: {
+        tiktok: '1080×1920',
+        square: '1080×1080',
+        wide: '1920×1080',
+      },
+      button: 'Exportar',
+      menuLabel: 'Opciones de exportación',
+      marker: 'Marcador de inicio',
+      markers: {
+        none: 'Ninguno',
+        flash: 'Flash (1 cuadro)',
+        beep: 'Pitido 120 ms',
+      },
+      outro: 'Outro',
+      outros: {
+        '500': '0.5 s (corte seco)',
+        '2000': '2 s',
+        '4000': '4 s',
+        '8000': '8 s',
+      },
+      summary: (mode: string, first: number | null, last: number | null, res: string) =>
+        first === null || last === null
+          ? `${mode} · ${res} a 60 fps`
+          : `${mode}, versos ${String(first)}–${String(last)} · ${res} a 60 fps`,
+      queuedToast: (title: string) => `Exportación en cola: «${title}»`,
+      doneToast: (title: string) => `Clip listo: «${title}»`,
+      failedToast: (title: string) => `Falló la exportación de «${title}»`,
+      opusNote:
+        'Tu navegador codificó el audio en Opus dentro de MP4 (sin AAC por hardware). Si algún editor antiguo no lo abre, usa Chrome de escritorio o convierte el audio.',
+    },
+  },
+  exports: {
+    clearFinished: 'Limpiar terminadas',
+    emptyTitle: 'Todavía no hay exportaciones',
+    emptyHint: 'Elige versos en el Editor y pulsa Exportar.',
+    states: {
+      queued: 'En cola',
+      rendering: (pct: number, etaText: string) =>
+        etaText ? `Renderizando ${String(pct)}% · ${etaText}` : `Renderizando ${String(pct)}%`,
+      done: 'Listo',
+      cancelled: 'Cancelado',
+      failed: 'Falló',
+    },
+    eta: (time: string) => `quedan ${time}`,
+    download: 'Descargar',
+    share: 'Compartir',
+    cancel: 'Cancelar',
+    confirmCancel: '¿Cancelar?',
+    remove: 'Quitar',
+    cancelledToast: 'Exportación cancelada.',
+    resolutionLabel: (w: number, h: number) => `${String(w)}×${String(h)}`,
   },
   settings: {
     appearance: 'Apariencia',
@@ -234,11 +348,37 @@ export const esMX = {
     spicyWorks: 'La clave funciona',
     spicySaved: 'Clave guardada',
     spicyRemoved: 'Clave borrada',
+    experimentalTitle: 'Funciones experimentales',
+    wordfxLabel: 'Efectos semánticos por palabra',
+    wordfxHint:
+      'Palabras sueltas de la letra reaccionan a su significado y emoción (tiempo, pérdida, amor…), solo dentro de la palabra. Se ve en la vista previa y al exportar.',
+    spotifyTitle: 'Spotify',
+    spotifyIntro:
+      'Opcional: conecta tu cuenta con tu propio Client ID para buscar con portada y ver qué está sonando en Inicio.',
+    spotifyClientId: 'Client ID',
+    spotifyClientIdPlaceholder: 'Client ID de tu app en developer.spotify.com',
+    spotifyRedirectUri: 'Redirect URI (regístralo en tu app de Spotify)',
+    spotifyCopy: 'Copiar',
+    spotifyCopied: 'Redirect URI copiado.',
+    spotifyConnect: 'Conectar',
+    spotifyConnecting: 'Conectando…',
+    spotifyDisconnect: 'Desconectar',
+    spotifyStatusConnected: 'Conectado a Spotify',
+    spotifyStatusDisconnected: 'Sin conectar',
+    spotifyConnectedToast: 'Spotify conectado.',
+    spotifyDisconnectedToast: 'Spotify desconectado.',
+    spotifyCallbackWorking: 'Completando conexión con Spotify…',
+    spotifyCallbackBack: 'Volver a Ajustes',
+    aboutTitle: 'Acerca de',
+    sourceCode: 'Código fuente',
+    sourceCodeHint: 'Licencia GNU AGPL-3.0. Sin servidor propio ni cuentas de ZH3 Marea.',
   },
   toast: {
     opened: (title: string) => `Abrí «${title}» en el Editor`,
     notSaved:
       'No pude guardar en este navegador (¿modo privado o sin espacio?). El proyecto sigue abierto, pero no quedará en la Biblioteca.',
+    updateAvailable: 'Hay una versión nueva disponible.',
+    updateAction: 'Actualizar',
   },
   errors: {
     unknown: 'Algo salió mal. Intenta de nuevo.',
@@ -277,6 +417,17 @@ export const esMX = {
       spicyKeyMissing: () => 'Escribe tu clave de Spicy Lyrics en Ajustes.',
       spicyKeyRejected: () =>
         'Spicy Lyrics no aceptó la clave. Revisa que sea correcta y que permita este sitio.',
+      spotifyClientMissing: () => 'Pega primero tu Client ID de Spotify en Ajustes.',
+      spotifyInvalidClient: () =>
+        'Spotify no reconoce ese Client ID. Revísalo en tu panel de Spotify for Developers.',
+      spotifyRejected: () =>
+        'Spotify rechazó el acceso. Vuelve a conectar la cuenta desde Ajustes.',
+      spotifyNotConnected: () => 'Spotify no está conectado. Conéctalo en Ajustes.',
+      spotifyStateMismatch: () =>
+        'La respuesta de Spotify no coincide con esta solicitud. Intenta conectar de nuevo.',
+      spotifyDenied: () =>
+        'Spotify no autorizó la conexión. Intenta de nuevo y acepta los permisos.',
+      spotifyCoverFailed: () => 'No pude descargar la portada desde Spotify.',
     },
     preset: {
       tooLarge: 'El archivo pesa más de 256 KB: no parece una Corriente.',
@@ -295,6 +446,17 @@ export const esMX = {
       decodeFailed: 'No pude leer ese archivo de audio. Usa un MP3, WAV, FLAC, M4A u OGG válido.',
       emptyAudio: 'Ese archivo de audio está vacío.',
       fileTooLarge: 'Ese archivo de audio es demasiado grande para abrirlo en el navegador.',
+    },
+    export: {
+      insecureContext:
+        'Para exportar video MP4 en el teléfono abre la página por HTTPS (en red local usa un túnel HTTPS o adb reverse).',
+      webcodecsUnsupported: 'Este navegador no soporta WebCodecs para exportar video MP4.',
+      noVideoEncoder: 'Este navegador no tiene un codificador H.264 disponible para MP4.',
+      noAudioEncoder: 'No hay codificador AAC ni Opus disponible para el audio.',
+      opfsFailed: 'No pude abrir almacenamiento local (OPFS) para guardar el clip.',
+      encodeFailed: 'Falló la codificación del video. Intenta de nuevo o usa otro formato.',
+      noAudioLoaded: 'Carga un archivo de audio en la pestaña Audio, o cambia a «Solo letra».',
+      missingExportFile: 'El archivo exportado ya no está disponible en este navegador.',
     },
   },
 };

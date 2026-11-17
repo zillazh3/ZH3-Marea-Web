@@ -5,6 +5,7 @@
   import { layout } from '../state/layout.svelte';
   import { palette } from '../state/palette.svelte';
   import { theme } from '../state/theme.svelte';
+  import { configuredSourceUrl } from '../sourceUrl';
   import Ambient from './Ambient.svelte';
   import CommandPalette from './CommandPalette.svelte';
   import DockSettings from './DockSettings.svelte';
@@ -21,6 +22,7 @@
   const { children }: Props = $props();
 
   const section = $derived(i18n.m.nav[router.current === 'callback' ? 'spotify' : router.current]);
+  const sourceUrl = configuredSourceUrl();
 
   let main: HTMLElement | undefined = $state();
   let shownRoute = router.current;
@@ -65,6 +67,11 @@
   class:dock={layout.isDock}
 >
   {@render children()}
+  {#if sourceUrl}
+    <footer class="app-footer">
+      <a href={sourceUrl} target="_blank" rel="noopener noreferrer">{i18n.m.settings.sourceCode}</a>
+    </footer>
+  {/if}
 </main>
 
 <DockSettings />
@@ -92,5 +99,22 @@
     padding: var(--page-pad-dock);
     padding-left: calc(var(--space-4) + env(safe-area-inset-left));
     padding-right: calc(var(--space-4) + env(safe-area-inset-right));
+  }
+
+  .app-footer {
+    margin-top: var(--space-6);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+    font-size: var(--fs-xs);
+  }
+
+  .app-footer a {
+    color: var(--faint);
+    text-decoration: none;
+  }
+
+  .app-footer a:hover {
+    color: var(--text);
+    text-decoration: underline;
   }
 </style>

@@ -6,6 +6,9 @@
   import Thumb from '../components/Thumb.svelte';
   import { i18n } from '../i18n.svelte';
   import Icon from '../icons/Icon.svelte';
+  import { toneFor } from '@/features/storage/meta';
+  import Cover from '../shell/Cover.svelte';
+  import { exportQueue } from '../state/exportQueue.svelte';
   import { library } from '../state/library.svelte';
 
   type Filter = 'all' | 'projects' | 'clips';
@@ -20,8 +23,17 @@
     { value: 'projects', label: m.library.projects },
     { value: 'clips', label: m.library.clips },
   ]);
-  // Exported clips arrive with the export milestone; until then only projects exist.
-  const items = $derived(filter === 'clips' ? [] : library.items);
+  const projects = $derived(filter === 'clips' ? [] : library.items);
+  const clips = $derived(
+    filter === 'projects' ? [] : exportQueue.jobs.filter((job) => job.state.kind === 'done'),
+  );
+
+  function formatBytes(bytes: number | undefined): string {
+    if (!bytes || bytes <= 0) return '';
+    const mb = bytes / (1024 * 1024);
+    if (mb >= 1) return `${mb.toFixed(1)} MB`;
+    return `${String(Math.max(1, Math.round(bytes / 1024)))} KB`;
+  }
 </script>
 
 <ScreenHead title={m.nav.library}>
@@ -35,7 +47,7 @@
   />
 </ScreenHead>
 
-{#if library.loaded && items.length === 0}
+{#if library.loaded && projects.length === 0 && clips.length === 0}
   {#if filter === 'clips'}
     <Empty title={m.library.noClipsTitle} hint={m.library.noClipsHint} />
   {:else}
@@ -43,7 +55,7 @@
   {/if}
 {:else}
   <div class="lib">
-    {#each items as item (item.id)}
+    {#each projects as item (item.id)}
       <div class="entry">
         <button
           class="open"
@@ -88,6 +100,63 @@
         </div>
       </div>
     {/each}
+
+    {#each clips as clip (clip.id)}
+      {@const sizeText = formatBytes(clip.sizeBytes)}
+      <div class="entry">
+        <button
+          class="open"
+          onclick={() => void exportQueue.download(clip.id)}
+          aria-label={`${m.exports.download}: ${clip.title || m.editor.untitled}`}
+        >
+          <span class="clip-thumb">
+            {#if clip.thumbUrl}
+              <img src={clip.thumbUrl} alt="" />
+            {:else}
+              <Cover tone={toneFor(clip.title, clip.artist)} />
+            {/if}
+          </span>
+        </button>
+        <div class="meta">
+          <div class="title">{clip.title || m.editor.untitled}</div>
+          {#if clip.artist}<div class="detail">{clip.artist}</div>{/if}
+          <div class="detail">
+            {clip.width && clip.height ? m.exports.resolutionLabel(clip.width, clip.height) : ''}
+            {#if clip.width && clip.height && sizeText}
+              ·
+            {/if}{sizeText}
+          </div>
+        </div>
+        <div class="tools">
+          <button
+            class="tool"
+            onclick={() => void exportQueue.download(clip.id)}
+            title={m.exports.download}
+            aria-label={m.exports.download}
+          >
+            <Icon name="download" />
+          </button>
+          {#if exportQueue.canShare()}
+            <button
+              class="tool"
+              onclick={() => void exportQueue.share(clip.id)}
+              title={m.exports.share}
+              aria-label={m.exports.share}
+            >
+              <Icon name="share-2" />
+            </button>
+          {/if}
+          <button
+            class="tool"
+            onclick={() => void exportQueue.remove(clip.id)}
+            title={m.exports.remove}
+            aria-label={m.exports.remove}
+          >
+            <Icon name="trash-2" />
+          </button>
+        </div>
+      </div>
+    {/each}
   </div>
 {/if}
 
@@ -103,9 +172,27 @@
     width: 100%;
   }
 
-  .open:hover :global(.thumb) {
+  .open:hover :global(.thumb),
+  .open:hover .clip-thumb {
     outline: 2px solid var(--accent-icon);
     outline-offset: 2px;
+  }
+
+  .clip-thumb {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    border-radius: var(--r-ctl);
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+
+  .clip-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .meta {

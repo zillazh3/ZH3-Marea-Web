@@ -131,6 +131,27 @@ test.describe('library', () => {
     await page.getByRole('button', { name: 'Clips' }).click();
     await expect(page.getByText('Todavía no hay clips')).toBeVisible();
   });
+
+  test('does not overlap Library filter buttons with the phone settings button', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto('/library');
+
+    const filterBox = await page.getByRole('group', { name: 'Filtrar biblioteca' }).boundingBox();
+    const settingsBox = await page.getByRole('link', { name: 'Ajustes' }).boundingBox();
+    expect(filterBox).not.toBeNull();
+    expect(settingsBox).not.toBeNull();
+    if (!filterBox || !settingsBox) return;
+
+    const overlapsX =
+      filterBox.x < settingsBox.x + settingsBox.width &&
+      filterBox.x + filterBox.width > settingsBox.x;
+    const overlapsY =
+      filterBox.y < settingsBox.y + settingsBox.height &&
+      filterBox.y + filterBox.height > settingsBox.y;
+    expect(overlapsX && overlapsY).toBe(false);
+  });
 });
 
 test.describe('search', () => {

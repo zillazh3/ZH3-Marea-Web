@@ -104,6 +104,15 @@ export const ICONS = {
   check: [path('M20 6 9 17l-5-5')],
   plus: [path('M5 12h14'), path('M12 5v14')],
   minus: [path('M5 12h14')],
+  x: [path('M18 6 6 18'), path('m6 6 12 12')],
+  'chevron-down': [path('m6 9 6 6 6-6')],
+  'share-2': [
+    circle(18, 5, 3),
+    circle(6, 12, 3),
+    circle(18, 19, 3),
+    path('m8.59 13.51 6.83 3.98'),
+    path('m15.41 6.51-6.82 3.98'),
+  ],
 } as const satisfies Record<string, readonly Shape[]>;
 
 export type IconName = keyof typeof ICONS;

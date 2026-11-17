@@ -8,16 +8,19 @@
   import AudioTab from '../editor/AudioTab.svelte';
   import BackgroundTab from '../editor/BackgroundTab.svelte';
   import { EditorController } from '../editor/editorState.svelte';
+  import ExportBar from '../editor/ExportBar.svelte';
+  import HooksTab from '../editor/HooksTab.svelte';
   import PreviewStage from '../editor/PreviewStage.svelte';
   import StyleTab from '../editor/StyleTab.svelte';
   import VerseList from '../editor/VerseList.svelte';
   import WatermarkTab from '../editor/WatermarkTab.svelte';
   import { i18n } from '../i18n.svelte';
   import { router } from '../router/router.svelte';
+  import { preferences } from '../state/preferences.svelte';
   import { session } from '../state/session.svelte';
 
-  type EditorTab = 'style' | 'background' | 'audio' | 'watermark';
-  const TABS: readonly EditorTab[] = ['style', 'background', 'audio', 'watermark'];
+  type EditorTab = 'style' | 'background' | 'audio' | 'watermark' | 'hooks';
+  const TABS: readonly EditorTab[] = ['style', 'background', 'audio', 'watermark', 'hooks'];
 
   const m = $derived(i18n.m);
   const project = $derived(session.project);
@@ -39,6 +42,10 @@
       loadedProject = null;
       loadedId = null;
     }
+  });
+
+  $effect(() => {
+    editor.refreshWordfx(preferences.value.wordfxExperimental);
   });
 
   onDestroy(() => {
@@ -105,13 +112,17 @@
             <BackgroundTab {editor} {project} />
           {:else if activeTab === 'audio'}
             <AudioTab {editor} {project} />
-          {:else}
+          {:else if activeTab === 'watermark'}
             <WatermarkTab {editor} />
+          {:else}
+            <HooksTab {editor} {project} />
           {/if}
         </div>
       </div>
     </div>
   </div>
+
+  <ExportBar {editor} />
 {:else}
   <Empty title={m.editor.emptyTitle} hint={m.editor.emptyHint}>
     <Button

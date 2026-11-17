@@ -59,8 +59,12 @@ Imports point inward only (left to right above is the allowed direction of depen
 
 ## Deploy
 
-Cloudflare Workers with static assets on the free `workers.dev` subdomain (planned for milestone 9; see
-`docs/decisions/0007-hosting.md`). Nothing in the code depends on a domain.
+Cloudflare Workers with static assets on the free `workers.dev` subdomain (see `wrangler.jsonc`, `public/_headers`, and `docs/decisions/0007-hosting.md`). Nothing in the source depends on a fixed domain:
+
+1. Optional build env var: set `VITE_SOURCE_URL=https://github.com/<owner>/<repo>` before building to expose the "Código fuente" link in Ajustes and the app footer (satisfies GNU AGPL-3.0 network notice).
+2. Authenticate Wrangler once (`npx wrangler login`) and inspect `npm run build` (`dist/` includes the PWA manifest, icons, `_headers`, and `sw.js`).
+3. Deploy only when ready: `npm run deploy` (`npm run build && npx wrangler deploy`).
+4. In Spotify for Developers, add `${origin}/callback` (shown with a Copy button in Ajustes; `http://127.0.0.1:5173/callback` in local dev) as a Redirect URI. The PWA installs from Chrome/Edge/Android and caches the shell, fonts, and WASM (lazily after first editor open) for offline use.
 
 ## License
 

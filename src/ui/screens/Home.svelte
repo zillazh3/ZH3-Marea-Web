@@ -1,5 +1,12 @@
 <script lang="ts">
-  import { openDemo, openProjectFile, openSaved, openTtml } from '../actions';
+  import { onMount } from 'svelte';
+  import {
+    createFromSpotifyTrack,
+    openDemo,
+    openProjectFile,
+    openSaved,
+    openTtml,
+  } from '../actions';
   import Button from '../components/Button.svelte';
   import ScreenHead from '../components/ScreenHead.svelte';
   import Thumb from '../components/Thumb.svelte';
@@ -7,14 +14,36 @@
   import { router } from '../router/router.svelte';
   import Cover from '../shell/Cover.svelte';
   import { library } from '../state/library.svelte';
+  import { spotifyStatus } from '../state/spotify.svelte';
 
   /** Thumbnails in the "recent" strip; the rest live in Biblioteca. */
   const RECENT_COUNT = 12;
   /** Placeholder cover for the welcome card, until there is a song playing. */
   const WELCOME_TONE = 0;
+  const NOW_PLAYING_POLL_MS = 12_000;
 
   const m = $derived(i18n.m);
   const recent = $derived(library.items.slice(0, RECENT_COUNT));
+  let openingNow = $state(false);
+
+  onMount(() => {
+    const timer = setInterval(() => {
+      if (spotifyStatus.connected && document.visibilityState === 'visible') {
+        void spotifyStatus.refreshNowPlaying();
+      }
+    }, NOW_PLAYING_POLL_MS);
+    return () => {
+      clearInterval(timer);
+    };
+  });
+
+  async function openCurrentTrack(): Promise<void> {
+    const track = spotifyStatus.nowPlaying?.track;
+    if (!track) return;
+    openingNow = true;
+    await createFromSpotifyTrack(track);
+    openingNow = false;
+  }
 </script>
 
 <ScreenHead title={m.nav.home} />
@@ -37,6 +66,42 @@
     </div>
   </div>
 </div>
+
+{#if spotifyStatus.connected}
+  {@const pb = spotifyStatus.nowPlaying}
+  <section class="card now-card" aria-label={m.home.spotifyNowTitle}>
+    <div class="now-head">
+      <h2>{m.home.spotifyNowTitle}</h2>
+      <Button
+        disabled={spotifyStatus.nowPlayingLoading}
+        onclick={() => void spotifyStatus.refreshNowPlaying()}
+      >
+        {m.home.spotifyRefresh}
+      </Button>
+    </div>
+    {#if pb}
+      <div class="now-row">
+        <div class="now-art">
+          {#if pb.track.coverUrl}
+            <img src={pb.track.coverUrl} alt="" />
+          {:else}
+            <Cover tone={0} />
+          {/if}
+        </div>
+        <div class="now-meta">
+          <div class="now-track">{pb.track.title}</div>
+          <div class="now-artist">{pb.track.artist}</div>
+          <div class="caption">{pb.isPlaying ? m.home.spotifyPlaying : m.home.spotifyPaused}</div>
+        </div>
+        <Button variant="primary" disabled={openingNow} onclick={() => void openCurrentTrack()}>
+          {openingNow ? m.search.fetching : m.home.spotifyOpenInEditor}
+        </Button>
+      </div>
+    {:else}
+      <p class="caption">{m.home.spotifyIdle}</p>
+    {/if}
+  </section>
+{/if}
 
 <h2 class="recents-title">{m.home.recents}</h2>
 {#if library.loaded && recent.length === 0}
@@ -146,5 +211,70 @@
       width: 120px;
       height: 120px;
     }
+
+    .now-row {
+      grid-template-columns: 56px 1fr;
+    }
+
+    .now-row :global(button) {
+      grid-column: 1 / -1;
+      justify-self: start;
+    }
+  }
+
+  .now-card {
+    margin-top: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .now-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .now-row {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    align-items: center;
+  }
+
+  .now-art {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .now-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .now-meta {
+    min-width: 0;
+  }
+
+  .now-track {
+    font-weight: 600;
+    font-size: var(--fs-md);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .now-artist {
+    font-size: var(--fs-sm);
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 </style>

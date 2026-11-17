@@ -12,8 +12,26 @@
   aria-label={i18n.m.shell.notifications}
 >
   {#each notifications.items as toast (toast.id)}
-    <div class="toast" class:ok={toast.kind === 'ok'} class:error={toast.kind === 'error'}>
-      {toast.message}
+    <div
+      class="toast"
+      class:ok={toast.kind === 'ok'}
+      class:error={toast.kind === 'error'}
+      class:has-action={Boolean(toast.action)}
+    >
+      <span>{toast.message}</span>
+      {#if toast.action}
+        {@const act = toast.action}
+        <button
+          type="button"
+          class="toast-btn"
+          onclick={() => {
+            notifications.dismiss(toast.id);
+            act.onClick();
+          }}
+        >
+          {act.label}
+        </button>
+      {/if}
     </div>
   {/each}
 </div>
@@ -39,6 +57,9 @@
   }
 
   .toast {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     padding: 10px var(--space-4);
     border-radius: var(--r-pill);
     background: var(--pop-bg);
@@ -46,6 +67,23 @@
     box-shadow: var(--shadow-toast);
     font-size: var(--fs-sm);
     animation: rise var(--dur-toast) var(--ease);
+  }
+
+  .toast.has-action {
+    pointer-events: auto;
+  }
+
+  .toast-btn {
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+  }
+
+  .toast-btn:hover {
+    filter: brightness(1.1);
   }
 
   .toast.error {

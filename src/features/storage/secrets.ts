@@ -1,6 +1,6 @@
 import { appDb } from './db';
 
-export type SecretName = 'spicyKey';
+export type SecretName = 'spicyKey' | 'spotifyClientId' | 'spotifyToken';
 
 /** Keys of this device, in IndexedDB. Settings says plainly that they are not encrypted. */
 export const secrets = {

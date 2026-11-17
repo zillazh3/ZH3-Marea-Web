@@ -7,7 +7,23 @@ import type { ProjectMeta } from './meta';
 // One IndexedDB database for everything small and structured. Large binaries (audio, exported video) go to OPFS, see opfs.ts.
 
 const DB_NAME = 'zh3marea';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
+
+export interface ExportClipRecord {
+  readonly id: string;
+  readonly title: string;
+  readonly artist: string;
+  readonly label: string;
+  readonly fileName: string;
+  readonly opfsName: string | null;
+  readonly sizeBytes: number;
+  readonly durationMs: number;
+  readonly width: number;
+  readonly height: number;
+  readonly audioCodec: 'aac' | 'opus' | null;
+  readonly createdAt: number;
+  readonly thumbPng: Uint8Array | null;
+}
 
 interface AppSchema extends DBSchema {
   /** Light records for the library listing. */
@@ -21,6 +37,12 @@ interface AppSchema extends DBSchema {
   presets: { key: string; value: PresetDocument };
   /** Cached 216x384 PNG thumbnails for Corrientes, keyed by visual signature hash. */
   presetThumbs: { key: string; value: Uint8Array };
+  /** Metadata + thumbnails for completed exports whose MP4 lives in OPFS. */
+  exportHistory: {
+    key: string;
+    value: ExportClipRecord;
+    indexes: { 'by-created': number };
+  };
 }
 
 export type AppDb = IDBPDatabase<AppSchema>;
@@ -41,6 +63,10 @@ export function appDb(): Promise<AppDb> {
       if (oldVersion < 2) {
         db.createObjectStore('presets');
         db.createObjectStore('presetThumbs');
+      }
+      if (oldVersion < 3) {
+        const exportsStore = db.createObjectStore('exportHistory', { keyPath: 'id' });
+        exportsStore.createIndex('by-created', 'createdAt');
       }
     },
   });

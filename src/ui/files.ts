@@ -30,12 +30,20 @@ export async function readText(file: File): Promise<string> {
   }
 }
 
-/** Saves `text` through the browser's download, which is how a static page hands a file to the user. */
-export function downloadText(filename: string, text: string, type: string): void {
-  const url = URL.createObjectURL(new Blob([text], { type }));
+/** Triggers a browser file download from a Blob. */
+export function downloadBlob(filename: string, blob: Blob): void {
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
   link.click();
-  URL.revokeObjectURL(url);
+  // Defer revocation slightly so large MP4 streams start before the URL is torn down.
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
+}
+
+/** Saves `text` through the browser's download, which is how a static page hands a file to the user. */
+export function downloadText(filename: string, text: string, type: string): void {
+  downloadBlob(filename, new Blob([text], { type }));
 }

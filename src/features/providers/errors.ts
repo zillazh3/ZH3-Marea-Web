@@ -6,7 +6,14 @@ export type ProviderErrorCode =
   /** The service (or our own limiter) asked to wait; `seconds` says how long. */
   | 'wait'
   | 'spicyKeyMissing'
-  | 'spicyKeyRejected';
+  | 'spicyKeyRejected'
+  | 'spotifyClientMissing'
+  | 'spotifyInvalidClient'
+  | 'spotifyRejected'
+  | 'spotifyNotConnected'
+  | 'spotifyStateMismatch'
+  | 'spotifyDenied'
+  | 'spotifyCoverFailed';
 
 /** A lyrics service that cannot answer. The UI turns `code` into a sentence that says what happened and how to fix it. */
 export class ProviderError extends Error {
