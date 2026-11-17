@@ -44,7 +44,7 @@ export const test = base.extend<{ guard: Findings }>({
 
       page.on('console', (message) => {
         // Chromium on Linux has no Web Bluetooth, so it does not know the `bluetooth` policy feature we deny in `_headers`.
-        if (/Permissions-Policy header: Unrecognized feature: 'bluetooth'/.test(message.text()))
+        if (message.text().includes("Permissions-Policy header: Unrecognized feature: 'bluetooth'"))
           return;
         if (message.type() === 'error' || message.type() === 'warning') {
           findings.errors.push(`console.${message.type()}: ${message.text()}`);
