@@ -129,30 +129,21 @@ src/
 tests/                   Architecture rules, parity against the desktop app, PWA and landing checks
 e2e/, e2e-static/        Playwright tests: dev server, and the production build with headers
 tools/                   Build plugins, landing renderer, smoke test, fixture generators
-docs/                    Decisions (ADRs), deploy guide, privacy and storage reference
+docs/                    Deploy guide, privacy and storage reference
 ```
 
 Imports point inward only (`shared` → `engine` → `render` → `export` → `features` → `ui`), and ESLint enforces it.
-See [ADR 0001](docs/decisions/0001-layered-architecture.md).
 
 ## Tech stack
 
-- **Vite and TypeScript (strict)**, with Svelte 5 for the app: small compiled output and no router or framework layer on top
-  ([ADR 0002](docs/decisions/0002-ui-stack.md)).
-- **Vanilla TypeScript for the landing**, pre-rendered to static HTML so it loads before any framework
-  ([ADR 0012](docs/decisions/0012-landing-architecture.md)).
-- **CanvasKit (Skia in WebAssembly)** in a worker: the same drawing primitives as the desktop app, and fast enough on phones
-  ([ADR 0003](docs/decisions/0003-renderer.md)).
-- **WebCodecs and Mediabunny**, in a worker: deterministic frame-by-frame encoding without blocking the UI
-  ([ADR 0004](docs/decisions/0004-export-pipeline.md)).
-- **Engine parity tests**: the engine is checked against values recorded from the desktop app
-  ([ADR 0005](docs/decisions/0005-engine-parity.md)).
-- **IndexedDB (`idb`) and OPFS** for projects, presets and large files ([ADR 0006](docs/decisions/0006-storage.md)).
+- **Vite and TypeScript (strict)**, with Svelte 5 for the app: small compiled output and no router or framework layer on top.
+- **Vanilla TypeScript for the landing**, pre-rendered to static HTML so it loads before any framework.
+- **CanvasKit (Skia in WebAssembly)** in a worker: the same drawing primitives as the desktop app, and fast enough on phones.
+- **WebCodecs and Mediabunny**, in a worker: deterministic frame-by-frame encoding without blocking the UI.
+- **Engine parity tests**: the engine is checked against values recorded from the desktop app.
+- **IndexedDB (`idb`) and OPFS** for projects, presets and large files.
 - **Vitest and Playwright** for unit and end-to-end tests, plus Lighthouse CI.
-- **Cloudflare Workers static assets**: a static site on the free `workers.dev` tier, with per-route security headers
-  ([ADR 0007](docs/decisions/0007-hosting.md)).
-
-All decisions are in [docs/decisions/](docs/decisions/).
+- **Cloudflare Workers static assets**: a static site on the free `workers.dev` tier, with per-route security headers.
 
 ## Deploying
 

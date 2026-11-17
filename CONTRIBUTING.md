@@ -54,9 +54,9 @@ CI runs all of this, plus Lighthouse, on every push (`.github/workflows/ci.yml`)
 
 - **TypeScript strict**, including `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`. ESLint runs `strictTypeChecked` and also rejects non-null assertions (`!`), so fix the type instead of silencing it.
 - **Layers.** Imports point inward only: `shared` → `engine` → `render` → `export` → `features` → `ui`. A layer imports only from
-  the ones before it. ESLint enforces this; see [ADR 0001](docs/decisions/0001-layered-architecture.md). The engine has no DOM.
+  the ones before it. ESLint enforces this. The engine has no DOM.
 - **Colors** live in `src/ui/styles/tokens.css`. A test fails on color literals anywhere else.
-- **Svelte 5** with runes. State goes in small `.svelte.ts` modules ([ADR 0002](docs/decisions/0002-ui-stack.md)).
+- **Svelte 5** with runes. State goes in small `.svelte.ts` modules.
 - **Formatting** is Prettier (single quotes, 100 columns, trailing commas). Run `npm run format` to fix it. The
   [.editorconfig](.editorconfig) sets LF line endings and two-space indentation.
 - Split files that grow past about 300 lines by responsibility.
@@ -86,7 +86,7 @@ To check the other direction, that the desktop app opens a project made by the w
 
 ## Docs
 
-Decisions go in [docs/decisions/](docs/decisions/) as short numbered ADRs. If you change what the app stores or where it sends
+If you change what the app stores or where it sends
 data, update [docs/privacy-and-storage.md](docs/privacy-and-storage.md) and both privacy pages together.
 
 ## License

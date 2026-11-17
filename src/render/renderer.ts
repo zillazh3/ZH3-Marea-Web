@@ -59,7 +59,7 @@ function sameLyrics(a: LyricsWithCredit, b: LyricsWithCredit): boolean {
 }
 
 /**
- * Stateful CanvasKit renderer behind a narrow `drawFrame` interface (ADR 0003).
+ * Stateful CanvasKit renderer behind a narrow `drawFrame` interface.
  * Shared by the live preview worker and future offline export.
  */
 export class CanvasKitRenderer implements FrameRenderer {

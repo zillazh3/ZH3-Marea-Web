@@ -43,7 +43,7 @@ export function precacheVersion(precacheUrls: readonly string[], extraSeed = '')
 
 export function renderServiceWorker(version: string, precacheUrls: readonly string[]): string {
   const urlsJson = JSON.stringify(precacheUrls, null, 2);
-  return `// Hand-written PWA service worker generated at build time (ADR 0008, scoped to /app/ per ADR 0012).
+  return `// Hand-written PWA service worker generated at build time (scoped to /app/).
 const CACHE_NAME = 'zh3marea-${version}';
 const PRECACHE = ${urlsJson};
 const LAZY_CACHE_RE = /\\.(?:wasm|js|css|ttf|svg|png|webmanifest)$/i;

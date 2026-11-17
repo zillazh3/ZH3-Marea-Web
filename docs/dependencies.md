@@ -6,13 +6,13 @@ Every runtime dependency needs a one-line reason here. Versions are those curren
 
 | Package | Reason |
 |---|---|
-| `svelte` | Component framework with a small compiled runtime for the six screens and the shell (ADR 0002). |
-| `canvaskit-wasm` | Skia in WASM (`0.42.x`) for layout and drawing parity with the desktop renderer (ADR 0003). |
-| `mediabunny` | Maintained MP4 muxer/demuxer and WebCodecs helpers; `mp4-muxer` is deprecated in its favor (ADR 0004). |
-| `idb` | Typed promise wrapper over IndexedDB, about 1 KB (ADR 0006). |
+| `svelte` | Component framework with a small compiled runtime for the six screens and the shell. |
+| `canvaskit-wasm` | Skia in WASM (`0.42.x`) for layout and drawing parity with the desktop renderer. |
+| `mediabunny` | Maintained MP4 muxer/demuxer and WebCodecs helpers; `mp4-muxer` is deprecated in its favor. |
+| `idb` | Typed promise wrapper over IndexedDB, about 1 KB. |
 | `yaml` | Parses LRCLIB's Lyricsfile word-sync format; loaded as a lazy chunk only when needed. |
 
-Not added on purpose: a router (about 50 lines of our own), i18n library (ADR 0009), service worker toolkit (ADR 0008), CSS framework,
+Not added on purpose: a router (about 50 lines of our own), i18n library, service worker toolkit, CSS framework,
 state library, date library.
 
 ## Development

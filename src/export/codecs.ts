@@ -132,7 +132,7 @@ export async function probeExportCodecs(
   const audioCandidates = format
     .getSupportedAudioCodecs()
     .filter((c): c is 'aac' | 'opus' => c === 'aac' || c === 'opus');
-  // Prefer AAC over Opus when available for broadest MP4 playback compatibility (ADR 0004).
+  // Prefer AAC over Opus when available for broadest MP4 playback compatibility.
   const orderedAudio: ('aac' | 'opus')[] = [
     ...audioCandidates.filter((c) => c === 'aac'),
     ...audioCandidates.filter((c) => c === 'opus'),

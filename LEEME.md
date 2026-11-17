@@ -131,30 +131,21 @@ src/
 tests/                   Reglas de arquitectura, paridad con la app de escritorio, revisiones de PWA y landing
 e2e/, e2e-static/        Pruebas de Playwright: servidor de desarrollo y build de producción con headers
 tools/                   Plugins de build, renderizador del landing, smoke test, generadores de fixtures
-docs/                    Decisiones (ADR), guía de deploy, referencia de privacidad y almacenamiento
+docs/                    Guía de deploy, referencia de privacidad y almacenamiento
 ```
 
 Los imports solo apuntan hacia adentro (`shared` → `engine` → `render` → `export` → `features` → `ui`) y ESLint lo hace cumplir.
-Mira el [ADR 0001](docs/decisions/0001-layered-architecture.md).
 
 ## Tecnologías
 
-- **Vite y TypeScript (strict)**, con Svelte 5 para la app: salida compilada pequeña y sin capas extra de router o framework
-  ([ADR 0002](docs/decisions/0002-ui-stack.md)).
-- **TypeScript sin framework para el landing**, prerenderizado a HTML estático para que cargue antes que cualquier framework
-  ([ADR 0012](docs/decisions/0012-landing-architecture.md)).
-- **CanvasKit (Skia en WebAssembly)** en un worker: las mismas primitivas de dibujo que la app de escritorio y suficiente velocidad en celulares
-  ([ADR 0003](docs/decisions/0003-renderer.md)).
-- **WebCodecs y Mediabunny**, en un worker: codificación determinista cuadro por cuadro sin bloquear la interfaz
-  ([ADR 0004](docs/decisions/0004-export-pipeline.md)).
-- **Pruebas de paridad del motor**: el motor se compara con valores grabados de la app de escritorio
-  ([ADR 0005](docs/decisions/0005-engine-parity.md)).
-- **IndexedDB (`idb`) y OPFS** para proyectos, presets y archivos grandes ([ADR 0006](docs/decisions/0006-storage.md)).
+- **Vite y TypeScript (strict)**, con Svelte 5 para la app: salida compilada pequeña y sin capas extra de router o framework.
+- **TypeScript sin framework para el landing**, prerenderizado a HTML estático para que cargue antes que cualquier framework.
+- **CanvasKit (Skia en WebAssembly)** en un worker: las mismas primitivas de dibujo que la app de escritorio y suficiente velocidad en celulares.
+- **WebCodecs y Mediabunny**, en un worker: codificación determinista cuadro por cuadro sin bloquear la interfaz.
+- **Pruebas de paridad del motor**: el motor se compara con valores grabados de la app de escritorio.
+- **IndexedDB (`idb`) y OPFS** para proyectos, presets y archivos grandes.
 - **Vitest y Playwright** para pruebas unitarias y de extremo a extremo, más Lighthouse CI.
-- **Cloudflare Workers con assets estáticos**: un sitio estático en el plan gratuito de `workers.dev`, con headers de seguridad por ruta
-  ([ADR 0007](docs/decisions/0007-hosting.md)).
-
-Todas las decisiones están en [docs/decisions/](docs/decisions/) (en inglés).
+- **Cloudflare Workers con assets estáticos**: un sitio estático en el plan gratuito de `workers.dev`, con headers de seguridad por ruta.
 
 ## Deploy
 

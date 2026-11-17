@@ -86,6 +86,6 @@ The old `workers.dev` address keeps working unless you turn it off in the same S
 
 - `public/_headers`: one strict policy for the landing, the privacy pages and the 404 (`/*`), one for the app (`/app/*`, and
   `/assets/*` for the workers). Cloudflare adds the rules together, so the app rules first detach the general policy with
-  `! Content-Security-Policy`. Limits: 100 rules, one `*` per pattern. Reasons per directive: `docs/decisions/0007-hosting.md`.
+  `! Content-Security-Policy`. Limits: 100 rules, one `*` per pattern.
 - `assets.not_found_handling: "404-page"` serves `dist/404.html` with status 404 for any unknown path.
 - Every change to `_headers` must pass `npm run test:e2e:static`, which serves the production build through `wrangler dev`.

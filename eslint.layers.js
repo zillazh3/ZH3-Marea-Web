@@ -1,4 +1,4 @@
-// Dependencies point inward only: shared <- engine <- render <- export <- features <- ui (ADR 0001).
+// Dependencies point inward only: shared <- engine <- render <- export <- features <- ui.
 const LAYERS = ['shared', 'engine', 'render', 'export', 'features', 'ui'];
 
 const patternsFor = (forbidden) => ({

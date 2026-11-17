@@ -7,7 +7,7 @@ const SIZES = [
 
 const THEMES = ['dark', 'light'] as const;
 
-// Baselines are rendered on the machine that records them; compare them by eye against docs/reference/mockup/screenshots.
+// Baselines are rendered on the machine that records them.
 for (const size of SIZES) {
   for (const colorScheme of THEMES) {
     test(`shell ${size.name} ${colorScheme}`, async ({ page }) => {
