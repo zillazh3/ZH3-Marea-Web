@@ -34,7 +34,7 @@ export function setupLyricStory(reduceMotion: boolean): () => void {
   );
 
   const syllableSpans: HTMLSpanElement[] = [];
-  const lastProgress: number[] = [];
+  const lastKeys: string[] = [];
 
   lineElements.forEach((lineElement, lineIndex) => {
     lineElement.textContent = '';
@@ -50,7 +50,7 @@ export function setupLyricStory(reduceMotion: boolean): () => void {
         if (spec.effect) span.dataset.fx = spec.effect;
         wordElement.append(span);
         syllableSpans.push(span);
-        lastProgress.push(-1);
+        lastKeys.push('');
       }
       lineElement.append(wordElement, wordPos < lineWords.length - 1 ? ' ' : '');
     });
@@ -59,20 +59,42 @@ export function setupLyricStory(reduceMotion: boolean): () => void {
   if (reduceMotion) return () => undefined;
 
   let activeLine = -1;
+  let trackOffsets: number[] | null = null;
+  const invalidateLayout = (): void => {
+    trackOffsets = null;
+  };
+  addEventListener('resize', invalidateLayout, { passive: true });
+  void document.fonts.ready.then(invalidateLayout);
 
   return function update(): void {
     const bounds = section.getBoundingClientRect();
+    if (trackOffsets === null) {
+      const viewportHeight = track.parentElement?.clientHeight ?? 0;
+      trackOffsets = lineElements.map(
+        (element) => viewportHeight * STORY_TRACK_CENTER_RATIO - element.offsetTop,
+      );
+    }
     const scrollableHeight = bounds.height - innerHeight;
     const scrolled = scrollableHeight > 0 ? clamp(-bounds.top / scrollableHeight) : 0;
     const evaluation = evaluateStoryFrame(timeline, scrolled);
 
     evaluation.syllables.forEach((syllableEval, index) => {
-      if (syllableEval.progress === lastProgress[index]) return;
-      lastProgress[index] = syllableEval.progress;
+      const p = syllableEval.progress.toFixed(3);
+      const lift = `${syllableEval.liftEm.toFixed(3)}em`;
+      const scale = syllableEval.scale.toFixed(3);
+      const glow = syllableEval.glow.toFixed(2);
+      const key = `${p}|${lift}|${scale}|${glow}|${syllableEval.state}`;
+      if (lastKeys[index] === key) return;
+      lastKeys[index] = key;
+
       const span = syllableSpans[index];
       if (!span) return;
-      span.style.setProperty('--progress', syllableEval.progress.toFixed(3));
+      span.style.setProperty('--progress', p);
+      span.style.setProperty('--lift', lift);
+      span.style.setProperty('--syl-scale', scale);
+      span.style.setProperty('--glow', glow);
       span.dataset.state = syllableEval.state;
+      span.toggleAttribute('data-glowing', syllableEval.glow > 0.01);
     });
 
     if (evaluation.activeLineIndex !== activeLine) {
@@ -80,11 +102,11 @@ export function setupLyricStory(reduceMotion: boolean): () => void {
       lineElements.forEach((element, index) => {
         const state = evaluation.lineStates[index];
         if (state) element.dataset.state = state;
+        const blur = evaluation.lineBlurs[index] ?? 0;
+        element.style.setProperty('--line-blur', `${String(blur)}px`);
       });
-      const viewportHeight = track.parentElement?.clientHeight ?? 0;
-      const activeElement = lineElements[activeLine];
-      if (activeElement) {
-        const trackY = viewportHeight * STORY_TRACK_CENTER_RATIO - activeElement.offsetTop;
+      const trackY = trackOffsets[activeLine];
+      if (trackY !== undefined) {
         track.style.setProperty('--track-y', `${trackY.toFixed(1)}px`);
       }
       counter.textContent = formatVerseCounter(verseTemplate, activeLine + 1, lineElements.length);

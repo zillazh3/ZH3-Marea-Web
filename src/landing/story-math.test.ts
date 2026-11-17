@@ -63,12 +63,17 @@ describe('story-math', () => {
     const mid = evaluateStoryFrame(timeline, 0.5);
     expect(mid.activeLineIndex).toBeGreaterThan(0);
     expect(mid.activeLineIndex).toBeLessThan(4);
+    expect(mid.lineBlurs[mid.activeLineIndex]).toBe(0);
+    expect(mid.lineBlurs.some((blur) => blur > 0)).toBe(true);
     expect(mid.syllables.some((s) => s.state === 'sung')).toBe(true);
-    expect(mid.syllables.some((s) => s.state === 'singing')).toBe(true);
+    expect(
+      mid.syllables.some((s) => s.state === 'singing' && s.liftEm < 0 && s.scale > 1 && s.glow > 0),
+    ).toBe(true);
 
     const atEnd = evaluateStoryFrame(timeline, 1);
     expect(atEnd.activeLineIndex).toBe(4);
     expect(atEnd.lineStates).toEqual(['past', 'past', 'past', 'past', 'active']);
+    expect(atEnd.lineBlurs[4]).toBe(0);
     expect(atEnd.syllables.every((s) => s.state === 'sung' && s.progress === 1)).toBe(true);
     expect(atEnd.closingVisible).toBe(true);
     expect(atEnd.seaLevel).toBeCloseTo(0.3, 6);

@@ -1,6 +1,13 @@
+import { clamp, lineBlurPx, sampleSyllableMotion } from './curves';
+
+export { clamp };
+
 export const LINE_END_PAUSE = 1.4;
 export const MIN_SYLLABLE_WEIGHT = 0.7;
 export const LETTERS_PER_WEIGHT_UNIT = 3;
+export const SYLLABLE_GLOW_TAIL_WEIGHT = 0.85;
+export const SUSTAIN_WEIGHT_THRESHOLD = 1.0;
+export const SUSTAIN_WEIGHT_SPAN = 1.6;
 export const STORY_HINT_FADE_THRESHOLD = 0.04;
 export const STORY_CLOSING_SHOW_THRESHOLD = 0.93;
 export const STORY_SEA_MAX_LEVEL = 0.3;
@@ -21,6 +28,7 @@ export interface StorySyllableSpec {
   readonly effect: string | null;
   readonly start: number;
   readonly end: number;
+  readonly sustain: number;
 }
 
 export interface StoryWordSpec {
@@ -38,6 +46,9 @@ export interface StoryTimeline {
 
 export interface EvaluatedSyllable {
   readonly progress: number;
+  readonly liftEm: number;
+  readonly scale: number;
+  readonly glow: number;
   readonly state: SyllableState;
 }
 
@@ -45,14 +56,11 @@ export interface StoryEvaluation {
   readonly position: number;
   readonly activeLineIndex: number;
   readonly lineStates: readonly LineState[];
+  readonly lineBlurs: readonly number[];
   readonly syllables: readonly EvaluatedSyllable[];
   readonly seaLevel: number;
   readonly hintVisible: boolean;
   readonly closingVisible: boolean;
-}
-
-export function clamp(value: number, min = 0, max = 1): number {
-  return Math.min(max, Math.max(min, value));
 }
 
 export function parseEffectsMap(rawFx: string | undefined): Record<string, string> {
@@ -101,6 +109,7 @@ export function buildStoryTimeline(lines: readonly StoryLineInput[]): StoryTimel
         const weight = computeSyllableWeight(part);
         const start = cursor;
         const end = cursor + weight;
+        const sustain = clamp((weight - SUSTAIN_WEIGHT_THRESHOLD) / SUSTAIN_WEIGHT_SPAN);
         cursor = end;
         syllableIndices.push(syllables.length);
         syllables.push({
@@ -110,6 +119,7 @@ export function buildStoryTimeline(lines: readonly StoryLineInput[]): StoryTimel
           effect,
           start,
           end,
+          sustain,
         });
       }
 
@@ -134,9 +144,18 @@ export function evaluateStoryFrame(timeline: StoryTimeline, rawScrolled: number)
 
   const evaluatedSyllables: EvaluatedSyllable[] = timeline.syllables.map((syllable) => {
     const span = syllable.end - syllable.start;
-    const progress = span > 0 ? clamp((position - syllable.start) / span) : 1;
-    const state: SyllableState = progress === 1 ? 'sung' : progress > 0 ? 'singing' : '';
-    return { progress, state };
+    const rawProgress = span > 0 ? clamp((position - syllable.start) / span) : 1;
+    const tailProgress =
+      position > syllable.end ? clamp((position - syllable.end) / SYLLABLE_GLOW_TAIL_WEIGHT) : 0;
+    const motion = sampleSyllableMotion(rawProgress, tailProgress, syllable.sustain);
+    const state: SyllableState = rawProgress === 1 ? 'sung' : rawProgress > 0 ? 'singing' : '';
+    return {
+      progress: motion.wipe,
+      liftEm: motion.liftEm,
+      scale: motion.scale,
+      glow: motion.glow,
+      state,
+    };
   });
 
   let activeLineIndex = 0;
@@ -151,11 +170,15 @@ export function evaluateStoryFrame(timeline: StoryTimeline, rawScrolled: number)
   const lineStates: LineState[] = Array.from({ length: timeline.lineCount }, (_, index) =>
     index === activeLineIndex ? 'active' : index < activeLineIndex ? 'past' : 'upcoming',
   );
+  const lineBlurs = Array.from({ length: timeline.lineCount }, (_, index) =>
+    lineBlurPx(index, activeLineIndex),
+  );
 
   return {
     position,
     activeLineIndex,
     lineStates,
+    lineBlurs,
     syllables: evaluatedSyllables,
     seaLevel: scrolled * STORY_SEA_MAX_LEVEL,
     hintVisible: scrolled <= STORY_HINT_FADE_THRESHOLD,

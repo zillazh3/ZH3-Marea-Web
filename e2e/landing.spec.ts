@@ -235,6 +235,33 @@ test.describe('static landing & app integration', () => {
 
     await expect(page.locator('.story-closing')).toHaveAttribute('data-visible', '');
     await expect(page.locator('.story-closing')).toBeVisible();
+
+    await page.evaluate(() => {
+      document
+        .querySelector('#corrientes')
+        ?.scrollIntoView({ behavior: 'instant', block: 'center' });
+    });
+    await expect(
+      page.locator('.currents .current-syllable[data-fx="water"]').first(),
+    ).toBeVisible();
+    await expect
+      .poll(async () => {
+        return page.evaluate(() => {
+          const cards = [...document.querySelectorAll('.currents li figure p:nth-child(2)')];
+          return cards.some((card) => {
+            const progresses = [...card.querySelectorAll<HTMLElement>('.current-syllable')].map(
+              (el) => Number.parseFloat(el.style.getPropertyValue('--progress') || '0'),
+            );
+            if (progresses.length < 2) return false;
+            const hasPartial = progresses.some((p) => p > 0 && p < 1);
+            const monotone = progresses.every(
+              (p, i) => i === 0 || p <= (progresses[i - 1] ?? 1) + 0.001,
+            );
+            return hasPartial && monotone;
+          });
+        });
+      })
+      .toBe(true);
   });
 
   test('matches visual snapshots across desktop (1440x900) and mobile (390x844)', async ({

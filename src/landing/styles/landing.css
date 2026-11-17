@@ -355,27 +355,60 @@ h2 {
     line-height: 1.16;
     letter-spacing: -0.015em;
     color: var(--landing-clip-text-dim);
-    filter: blur(1.1px);
-    transition: filter 0.4s;
+    filter: blur(var(--line-blur, 1px));
+    scale: 0.97;
+    transform-origin: left center;
+    transition:
+      filter 0.4s,
+      scale 0.5s var(--ease);
   }
   li[data-state='past'] {
     color: var(--landing-clip-text-past);
   }
   li[data-state='active'] {
     filter: none;
+    scale: 1;
   }
-  li[data-state='active'] span {
+  li b {
+    font-weight: inherit;
+    white-space: nowrap;
+  }
+  li[data-state='active'] .clip-syllable {
+    --progress: 0;
+    --lift: 0em;
+    --syl-scale: 1;
+    --glow: 0;
+    --fill: var(--on-accent);
+    --feather: clamp(0%, calc(var(--progress) * 14%), 8%);
+    display: inline-block;
     background: linear-gradient(
       90deg,
-      var(--on-accent) calc(var(--progress, 0) * 100%),
-      var(--landing-clip-text-upcoming) calc(var(--progress, 0) * 100%)
+      var(--fill) calc(var(--progress) * 100% - var(--feather)),
+      var(--landing-clip-text-upcoming) calc(var(--progress) * 100% + var(--feather))
     );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-  }
-  li span[data-singing] {
-    text-shadow: 0 0 12px var(--landing-clip-glow);
+    transform-origin: 50% 80%;
+    transform: translateY(var(--lift)) scale(var(--syl-scale));
+    &[data-glowing] {
+      text-shadow: 0 0 calc(0.42em * var(--glow))
+        color-mix(in srgb, var(--landing-clip-glow) calc(100% * var(--glow)), transparent);
+    }
+    &[data-fx='water'] {
+      --fill: var(--landing-fx-water);
+    }
+    &[data-fx='water'][data-glowing] {
+      text-shadow: 0 0 calc(0.45em * var(--glow))
+        color-mix(in srgb, var(--landing-fx-water-glow) calc(100% * var(--glow)), transparent);
+    }
+    &[data-fx='light'] {
+      --fill: var(--landing-fx-light);
+    }
+    &[data-fx='light'][data-glowing] {
+      text-shadow: 0 0 calc(0.55em * var(--glow))
+        color-mix(in srgb, var(--landing-fx-light-glow) calc(100% * var(--glow)), transparent);
+    }
   }
   footer {
     position: absolute;
@@ -669,11 +702,14 @@ h2 {
       filter 0.5s,
       scale 0.6s var(--ease);
   }
-  p[data-state='active'] {
-    scale: 1.015;
-  }
+  p[data-state='past'],
   p[data-state='upcoming'] {
-    filter: blur(2px);
+    filter: blur(var(--line-blur, 0px));
+    scale: 0.97;
+  }
+  p[data-state='active'] {
+    filter: none;
+    scale: 1;
   }
   b {
     font-weight: inherit;
@@ -682,32 +718,39 @@ h2 {
 }
 .syllable {
   --progress: 0;
+  --lift: 0em;
+  --syl-scale: 1;
+  --glow: 0;
   --fill: var(--on-accent);
+  --feather: clamp(0%, calc(var(--progress) * 14%), 8%);
   display: inline-block;
   background: linear-gradient(
     90deg,
-    var(--fill) calc(var(--progress) * 100%),
-    var(--landing-syllable-upcoming) calc(var(--progress) * 100%)
+    var(--fill) calc(var(--progress) * 100% - var(--feather)),
+    var(--landing-syllable-upcoming) calc(var(--progress) * 100% + var(--feather))
   );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  translate: 0 calc((1 - var(--progress)) * 0.06em);
-  transition: text-shadow 0.3s;
-  &[data-state='singing'] {
-    text-shadow: 0 0 0.35em var(--landing-syllable-singing-glow);
+  transform-origin: 50% 80%;
+  transform: translateY(var(--lift)) scale(var(--syl-scale));
+  &[data-glowing] {
+    text-shadow: 0 0 calc(0.42em * var(--glow))
+      color-mix(in srgb, var(--landing-syllable-singing-glow) calc(100% * var(--glow)), transparent);
   }
   &[data-fx='water'] {
     --fill: var(--landing-fx-water);
   }
-  &[data-fx='water'][data-state='sung'] {
-    text-shadow: 0 0 0.4em var(--landing-fx-water-glow);
+  &[data-fx='water'][data-glowing] {
+    text-shadow: 0 0 calc(0.45em * var(--glow))
+      color-mix(in srgb, var(--landing-fx-water-glow) calc(100% * var(--glow)), transparent);
   }
   &[data-fx='light'] {
     --fill: var(--landing-fx-light);
   }
-  &[data-fx='light'][data-state='sung'] {
-    text-shadow: 0 0 0.5em var(--landing-fx-light-glow);
+  &[data-fx='light'][data-glowing] {
+    text-shadow: 0 0 calc(0.55em * var(--glow))
+      color-mix(in srgb, var(--landing-fx-light-glow) calc(100% * var(--glow)), transparent);
   }
 }
 .story-closing {
@@ -931,14 +974,49 @@ h2 {
   figure p:nth-child(2) {
     margin: 0.35em 0;
     filter: none;
-    background: linear-gradient(90deg, var(--on-accent) 50%, var(--landing-clip-text-upcoming) 50%)
-      100% 0 / 200% 100%;
+    color: var(--on-accent);
+  }
+  figure b {
+    font-weight: inherit;
+    white-space: nowrap;
+  }
+  .current-syllable {
+    --progress: 1;
+    --lift: 0em;
+    --syl-scale: 1;
+    --syl-glow: 0;
+    --fill: var(--on-accent);
+    --feather: clamp(0%, calc(var(--progress) * 14%), 8%);
+    display: inline-block;
+    background: linear-gradient(
+      90deg,
+      var(--fill) calc(var(--progress) * 100% - var(--feather)),
+      var(--landing-clip-text-upcoming) calc(var(--progress) * 100% + var(--feather))
+    );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    text-shadow: 0 0 calc(16px * var(--glow))
-      color-mix(in srgb, var(--on-accent) calc(50% * var(--glow)), transparent);
-    animation: wipe 3.2s linear infinite;
+    transform-origin: 50% 80%;
+    transform: translateY(var(--lift)) scale(var(--syl-scale));
+    &[data-glowing] {
+      text-shadow: 0 0 calc(0.45em * var(--glow) * var(--syl-glow))
+        color-mix(
+          in srgb,
+          var(--landing-clip-glow) calc(100% * var(--glow) * var(--syl-glow)),
+          transparent
+        );
+    }
+    &[data-fx='water'] {
+      --fill: var(--landing-fx-water);
+    }
+    &[data-fx='water'][data-glowing] {
+      text-shadow: 0 0 calc(0.48em * var(--glow) * var(--syl-glow))
+        color-mix(
+          in srgb,
+          var(--landing-fx-water-glow) calc(100% * var(--glow) * var(--syl-glow)),
+          transparent
+        );
+    }
   }
   figcaption {
     position: absolute;
@@ -990,24 +1068,6 @@ h2 {
     margin-top: 14px;
     color: var(--landing-muted);
     font-size: var(--fs-body);
-  }
-}
-.currents li:nth-child(2) figure p:nth-child(2) {
-  animation-delay: -0.8s;
-}
-.currents li:nth-child(3) figure p:nth-child(2) {
-  animation-delay: -1.6s;
-}
-.currents li:nth-child(4) figure p:nth-child(2) {
-  animation-delay: -2.4s;
-}
-@keyframes wipe {
-  0% {
-    background-position: 100% 0;
-  }
-  80%,
-  100% {
-    background-position: 0 0;
   }
 }
 
@@ -1205,9 +1265,16 @@ h2 {
   }
   .lyrics p {
     filter: none !important;
+    scale: 1 !important;
   }
-  .syllable {
+  .syllable,
+  .clip li[data-state='active'] .clip-syllable,
+  .currents .current-syllable {
     --progress: 1 !important;
+    --lift: 0em !important;
+    --syl-scale: 1 !important;
+    --glow: 0 !important;
+    --syl-glow: 0 !important;
   }
   .story-closing {
     position: relative;
