@@ -94,6 +94,16 @@ export const ICONS = {
     path('M3 6h18'),
     path('M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'),
   ],
+  ellipsis: [circle(12, 12, 1), circle(19, 12, 1), circle(5, 12, 1)],
+  image: [
+    rect(3, 3, 18, 18, 2),
+    circle(9, 9, 2),
+    path('m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21'),
+  ],
+  music: [path('M9 18V5l12-2v13'), circle(6, 18, 3), circle(18, 16, 3)],
+  check: [path('M20 6 9 17l-5-5')],
+  plus: [path('M5 12h14'), path('M12 5v14')],
+  minus: [path('M5 12h14')],
 } as const satisfies Record<string, readonly Shape[]>;
 
 export type IconName = keyof typeof ICONS;
