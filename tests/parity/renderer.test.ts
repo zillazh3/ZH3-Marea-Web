@@ -5,6 +5,7 @@ import CanvasKitInit from 'canvaskit-wasm';
 import { describe, expect, it } from 'vitest';
 import { defaultParams } from '@/engine/params';
 import { demoLyrics } from '@/features/lyrics/demo';
+import { buildFxPlan } from '@/features/wordfx/plan';
 import { CanvasKitRenderer, renderSnapshotPng } from '@/render/renderer';
 import { defaultStyle } from '@/render/style';
 import { Fonts } from '@/render/text';
@@ -87,6 +88,65 @@ describe('CanvasKit Scene snapshot rendering', () => {
       expect(renderer.currentTimeMs()).toBe(tBefore);
     } finally {
       renderer.dispose();
+      fonts.dispose();
+    }
+  });
+
+  it('renders deterministic wordfx frames (adaptBg, glow, particles, debug labels) distinct from plain render', async () => {
+    const ck = await CanvasKitInit({ locateFile: () => wasmPath });
+    const fonts = new Fonts(ck, toArrayBuffer(boldBytes), toArrayBuffer(regularBytes));
+    try {
+      const lyrics = demoLyrics();
+      const fxPlan = buildFxPlan(lyrics, {
+        intensity: 1.2,
+        adaptBg: true,
+        trackId: 'test-demo',
+        palette: [
+          [28, 36, 68],
+          [110, 140, 210],
+          [220, 180, 120],
+        ],
+      });
+      expect(Object.keys(fxPlan.words).length).toBeGreaterThan(0);
+
+      const baseSpec = {
+        lyrics,
+        coverBytes: null,
+        demoCoverLabel: true,
+        width: 216,
+        height: 384,
+        params: defaultParams(),
+        style: { ...defaultStyle(), title: 'Marea de luz', artist: 'Demo' },
+        clipStartMs: 6000,
+      };
+      const firstWord = Object.values(fxPlan.words)[0];
+      const activeMs = firstWord ? firstWord.match.beginMs + 180 : 12500;
+
+      const plainPng = renderSnapshotPng(ck, fonts, { ...baseSpec, fxPlan: null }, activeMs);
+      const fxPngA = renderSnapshotPng(
+        ck,
+        fonts,
+        { ...baseSpec, fxPlan, fxDebug: false },
+        activeMs,
+      );
+      const fxPngB = renderSnapshotPng(
+        ck,
+        fonts,
+        { ...baseSpec, fxPlan, fxDebug: false },
+        activeMs,
+      );
+      const debugPng = renderSnapshotPng(
+        ck,
+        fonts,
+        { ...baseSpec, fxPlan, fxDebug: true },
+        activeMs,
+      );
+
+      expect(fxPngA.byteLength).toBeGreaterThan(5000);
+      expect(fxPngA).toEqual(fxPngB);
+      expect(fxPngA).not.toEqual(plainPng);
+      expect(debugPng).not.toEqual(fxPngA);
+    } finally {
       fonts.dispose();
     }
   });

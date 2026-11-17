@@ -151,13 +151,13 @@ export function drawGap(
   pGlow: Paint,
   pFill: Paint,
   maskBlur: (sigma: number) => MaskFilter | null,
+  dotRgb: Rgb = [255, 255, 255],
 ): void {
   const d = 0.32 * size;
   const gap = 0.24 * size;
   const gw = 3 * d + 2 * gap;
   const left = item.duet ? stageW - 0.15 * stageW - gw : size;
   const cy = item.h / 2;
-  const white: Rgb = [255, 255, 255];
 
   pGlow.setShader(null);
   pFill.setShader(null);
@@ -173,11 +173,11 @@ export function drawGap(
     canvas.translate(i * (d + gap) + d / 2, dot.y * size);
     canvas.scale(dot.scale, dot.scale);
     if (dot.haloA > 0) {
-      pGlow.setColor(rgba4f(white, dot.haloA * dot.op * item.groupOpacity));
+      pGlow.setColor(rgba4f(dotRgb, dot.haloA * dot.op * item.groupOpacity));
       pGlow.setMaskFilter(maskBlur((dot.haloR * size) / 2));
       canvas.drawCircle(0, 0, d / 2, pGlow);
     }
-    pFill.setColor(rgba4f(white, dot.op * item.groupOpacity));
+    pFill.setColor(rgba4f(dotRgb, dot.op * item.groupOpacity));
     canvas.drawCircle(0, 0, d / 2, pFill);
     canvas.restore();
   });

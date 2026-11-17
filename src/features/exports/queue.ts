@@ -1,6 +1,12 @@
 export type ExportState =
   | { kind: 'queued' }
-  | { kind: 'rendering'; progress: number; etaSeconds: number | null }
+  | {
+      kind: 'rendering';
+      progress: number;
+      etaSeconds: number | null;
+      doneFrames?: number;
+      totalFrames?: number;
+    }
   | { kind: 'done' }
   | { kind: 'failed'; message: string }
   | { kind: 'cancelled' };
@@ -10,6 +16,17 @@ export interface ExportJob {
   title: string;
   artist: string;
   state: ExportState;
+  label?: string;
+  fileName?: string;
+  opfsName?: string | null;
+  sizeBytes?: number;
+  durationMs?: number;
+  width?: number;
+  height?: number;
+  audioCodec?: 'aac' | 'opus' | null;
+  thumbUrl?: string | null;
+  mp4Bytes?: ArrayBuffer | null;
+  createdAt?: number;
 }
 
 export interface QueueSummary {

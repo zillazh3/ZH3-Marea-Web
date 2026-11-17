@@ -5,10 +5,10 @@ import { rgba4f } from './overlays';
 import type { Rgb, Style } from './style';
 import { LINE_H, type Fonts } from './text';
 
-const FW = 0.5;
+export const FW = 0.5;
 const FW_SOFT = 1.3;
-const ORIGIN_SYL = 0.81;
-const ORIGIN_CH = 0.75;
+export const ORIGIN_SYL = 0.81;
+export const ORIGIN_CH = 0.75;
 const WHITE: Rgb = [255, 255, 255];
 
 export interface WordDrawContext {
@@ -26,7 +26,7 @@ export interface WordDrawContext {
   readonly maskBlur: (sigma: number) => MaskFilter | null;
 }
 
-function wipeShader(
+export function wipeShader(
   ck: CanvasKit,
   x: number,
   w: number,

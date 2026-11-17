@@ -293,6 +293,13 @@ def main():
     write(out.parent / "render", "layout.json", render_cases.layout_fixture(lyrics, Fonts, ItemLayout, layout_credit))
     write(out.parent / "render", "palette.json", render_cases.palette_fixture(demo_cover, dominant_colors))
     write(out.parent / "presets", "cases.json", render_cases.presets_fixture(desktop))
+    import m8_cases
+
+    write(out.parent / "audio", "analysis.json", m8_cases.audio_analysis_fixture())
+    write(out.parent / "wordfx", "matcher.json", m8_cases.matcher_fixture(exact_lyrics))
+    write(out.parent / "wordfx", "plan.json", m8_cases.plan_fixture(exact_lyrics, dominant_colors, demo_cover))
+    write(out.parent / "wordfx", "anim.json", m8_cases.anim_fixture(exact_lyrics, dominant_colors, demo_cover))
+    write(out.parent / "hooks", "suggest.json", m8_cases.hooks_fixture(exact_lyrics))
     for scenario in goldens(Engine, Params, exact_lyrics):
         write(out, f"golden-{scenario['name']}.json", scenario)
 

@@ -1,6 +1,8 @@
 import type { CanvasKit, Image, Surface } from 'canvaskit-wasm';
 import type { Params } from '@/engine/params';
+import type { FxPlanData, Rgb } from '@/engine/wordfx/fxtypes';
 import { createDemoCover } from './cover';
+import { dominantColors } from './palette';
 import { Scene, type LyricsWithCredit } from './scene';
 import type { Style } from './style';
 import type { Fonts } from './text';
@@ -14,6 +16,8 @@ export interface SceneSpec {
   readonly params: Params;
   readonly style: Style;
   readonly clipStartMs: number | null;
+  readonly fxPlan?: FxPlanData | null;
+  readonly fxDebug?: boolean;
 }
 
 export interface FrameRenderer {
@@ -103,6 +107,8 @@ export class CanvasKitRenderer implements FrameRenderer {
         spec.height,
         spec.params,
         spec.style,
+        spec.fxPlan ?? null,
+        spec.fxDebug ?? false,
       );
       this.scene.clipStartMs = spec.clipStartMs;
       if (offsetMs !== null) this.scene.engine.warmup(offsetMs);
@@ -110,10 +116,16 @@ export class CanvasKitRenderer implements FrameRenderer {
       this.scene.updateStyle(spec.style);
       Object.assign(this.scene.engine.params, spec.params);
       this.scene.engine.reconfigure();
+      this.scene.setWordfx(spec.fxPlan ?? null, spec.fxDebug ?? false);
       this.scene.clipStartMs = spec.clipStartMs;
     }
 
     this.lastSpec = spec;
+  }
+
+  /** Extracts up to `k` dominant colors from the currently active cover image. */
+  coverPalette(k = 5): Rgb[] {
+    return this.coverImage ? dominantColors(this.ck, this.coverImage, k) : [];
   }
 
   seek(tMs: number): void {

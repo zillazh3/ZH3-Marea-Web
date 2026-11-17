@@ -1,4 +1,5 @@
 import type { Params } from '@/engine/params';
+import type { FxPlanData, Rgb } from '@/engine/wordfx/fxtypes';
 import type { ClockMode, WorkerRequest, WorkerResponse } from './preview.worker';
 import type { LyricsWithCredit } from './scene';
 import type { Style } from './style';
@@ -14,6 +15,7 @@ export interface PreviewCallbacks {
   onReady?: (gpu: boolean) => void;
   onError?: (message: string) => void;
   onPosition?: (pos: PreviewPosition) => void;
+  onCoverPalette?: (palette: Rgb[]) => void;
 }
 
 export interface ConfigurePayload {
@@ -24,6 +26,8 @@ export interface ConfigurePayload {
   readonly style: Style;
   readonly rangeStartMs: number;
   readonly rangeEndMs: number;
+  readonly fxPlan?: FxPlanData | null;
+  readonly fxDebug?: boolean;
 }
 
 export interface ThumbRequest {
@@ -79,6 +83,9 @@ export class PreviewClient {
       case 'error':
         this.callbacks.onError?.(msg.message);
         return;
+      case 'palette':
+        this.callbacks.onCoverPalette?.(msg.palette);
+        return;
       case 'position':
         this.callbacks.onPosition?.({
           offsetMs: msg.offsetMs,
@@ -120,6 +127,8 @@ export class PreviewClient {
         style: payload.style,
         rangeStartMs: payload.rangeStartMs,
         rangeEndMs: payload.rangeEndMs,
+        fxPlan: payload.fxPlan ?? null,
+        fxDebug: payload.fxDebug ?? false,
       },
       coverBuf ? [coverBuf] : [],
     );

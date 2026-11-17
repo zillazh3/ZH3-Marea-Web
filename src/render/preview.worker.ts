@@ -2,6 +2,7 @@ import CanvasKitInit from 'canvaskit-wasm';
 import type { CanvasKit, Surface } from 'canvaskit-wasm';
 import wasmUrl from 'canvaskit-wasm/bin/canvaskit.wasm?url';
 import type { Params } from '@/engine/params';
+import type { FxPlanData, Rgb } from '@/engine/wordfx/fxtypes';
 import boldFontUrl from './fonts/InterTight-Bold.ttf?url';
 import regularFontUrl from './fonts/InterTight-Regular.ttf?url';
 import { CanvasKitRenderer, renderSnapshotPng, type SceneSpec } from './renderer';
@@ -31,6 +32,8 @@ export type WorkerRequest =
       style: Style;
       rangeStartMs: number;
       rangeEndMs: number;
+      fxPlan: FxPlanData | null;
+      fxDebug: boolean;
     }
   | { type: 'range'; rangeStartMs: number; rangeEndMs: number; seekToStart: boolean }
   | { type: 'seek'; offsetMs: number }
@@ -51,6 +54,7 @@ export type WorkerRequest =
 export type WorkerResponse =
   | { type: 'ready'; gpu: boolean }
   | { type: 'error'; message: string }
+  | { type: 'palette'; palette: Rgb[] }
   | { type: 'position'; offsetMs: number; durationMs: number; p95DrawMs: number; halfRate: boolean }
   | { type: 'ended' }
   | { type: 'thumb'; id: string; pngBytes: ArrayBuffer }
@@ -90,6 +94,20 @@ let currentCoverBytes: Uint8Array | null = null;
 let currentDemoLabel = false;
 let currentParams: Params | null = null;
 let currentStyle: Style | null = null;
+let currentFxPlan: FxPlanData | null = null;
+let currentFxDebug = false;
+let lastPaletteCover: Uint8Array | null | undefined = undefined;
+let lastPaletteDemo: boolean | null = null;
+
+function sameBytes(a: Uint8Array | null | undefined, b: Uint8Array | null | undefined): boolean {
+  if (a === b) return true;
+  if (a?.byteLength !== b?.byteLength) return false;
+  if (!a || !b) return false;
+  for (let i = 0; i < a.byteLength; i += 1) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
 
 const drawSamples: number[] = [];
 let halfRate = false;
@@ -256,8 +274,19 @@ function applyConfigure(seekToMs: number | null): void {
     params: currentParams,
     style: currentStyle,
     clipStartMs: rangeStartMs,
+    fxPlan: currentFxPlan,
+    fxDebug: currentFxDebug,
   };
   renderer.configure(spec);
+  if (
+    lastPaletteCover === undefined ||
+    !sameBytes(lastPaletteCover, currentCoverBytes) ||
+    lastPaletteDemo !== currentDemoLabel
+  ) {
+    lastPaletteCover = currentCoverBytes;
+    lastPaletteDemo = currentDemoLabel;
+    workerSelf.postMessage({ type: 'palette', palette: renderer.coverPalette(5) });
+  }
   if (seekToMs !== null) renderer.seek(seekToMs);
   needsDraw = true;
   wake();
@@ -281,6 +310,8 @@ function handleMessage(msg: WorkerRequest): void {
       currentDemoLabel = msg.demoCoverLabel;
       currentParams = msg.params;
       currentStyle = msg.style;
+      currentFxPlan = msg.fxPlan;
+      currentFxDebug = msg.fxDebug;
       rangeStartMs = msg.rangeStartMs;
       rangeEndMs = Math.max(msg.rangeStartMs + 1, msg.rangeEndMs);
       if (firstInit) {

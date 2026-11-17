@@ -12,8 +12,19 @@ import type { Item, Word } from '@/engine/items';
 import type { Line, Lyrics } from '@/engine/lyrics';
 import type { Params } from '@/engine/params';
 import { TUNING } from '@/engine/tuning';
+import type { FxPlanData } from '@/engine/wordfx/fxtypes';
+import { planInterludeColor, planStrainAt } from '@/engine/wordfx/planLookup';
 import { pyRound } from '@/shared/pycompat';
 import { CoverBackground } from './background';
+import { WordfxRenderCaches } from './wordfx/caches';
+import {
+  buildWordFxMap,
+  drawSceneFxWord,
+  isWordFxIdle,
+  type WordFxAttachment,
+} from './wordfx/carrier';
+import { drawDebugLabel } from './wordfx/draw';
+import { BackdropProbe } from './wordfx/probe';
 import {
   disposeHeaderCache,
   disposeWaveCache,
@@ -99,6 +110,12 @@ export class Scene {
   private headerCache: HeaderCache | null = null;
   private waveCache: WaveCache | null = null;
   private glowTint: Rgb | null = null;
+  private fxPlan: FxPlanData | null = null;
+  private fxDebug = false;
+  private fxByWord = new WeakMap<Word, WordFxAttachment>();
+  private fxCaches: WordfxRenderCaches | null = null;
+  private probe: BackdropProbe | null = null;
+  private readonly lineIndexByRef = new Map<object, number>();
   private disposed = false;
 
   clipStartMs: number | null = null;
@@ -112,6 +129,8 @@ export class Scene {
     h: number,
     params: Params,
     style: Style,
+    fxPlan: FxPlanData | null = null,
+    fxDebug = false,
   ) {
     this.ck = ck;
     this.fonts = fonts;
@@ -176,11 +195,40 @@ export class Scene {
       params,
       creditH: this.creditLayout.height,
     });
+    for (let li = 0; li < lyrics.lines.length; li += 1) {
+      const l = lyrics.lines[li];
+      if (l) this.lineIndexByRef.set(l, li);
+    }
     for (const item of this.engine.items) {
       if (!item.isGap && !item.isCredit && item.line) {
         this.byLine.set(item.line, item);
       }
     }
+    this.setWordfx(fxPlan, fxDebug);
+  }
+
+  /** Attaches or clears semantic wordfx plan without rebuilding scene geometry or engine state. */
+  setWordfx(fxPlan: FxPlanData | null, fxDebug = false): void {
+    if (this.fxPlan !== fxPlan) {
+      this.fxPlan = fxPlan;
+      this.fxByWord = buildWordFxMap(fxPlan, this.engine.items, this.lineIndexByRef);
+    }
+    this.fxDebug = fxDebug;
+  }
+
+  private getFxCaches(): WordfxRenderCaches {
+    this.fxCaches ??= new WordfxRenderCaches(this.ck);
+    return this.fxCaches;
+  }
+
+  private getProbe(): BackdropProbe {
+    this.probe ??= new BackdropProbe(this.ck, this.cover, this.w, this.h, {
+      blur: this.style.bgBlur,
+      veil: this.style.bgVeil,
+      sat: this.style.bgSat,
+      speed: this.style.bgSpeed,
+    });
+    return this.probe;
   }
 
   /** Updates style fields that do not require rebuilding geometry/engine. */
@@ -200,6 +248,12 @@ export class Scene {
     this.style = { ...next };
     this.pWhite.setColor(rgba4f(next.textRgb, 1));
     this.bg.update(this.cover, {
+      blur: next.bgBlur,
+      veil: next.bgVeil,
+      sat: next.bgSat,
+      speed: next.bgSpeed,
+    });
+    this.probe?.update(this.cover, {
       blur: next.bgBlur,
       veil: next.bgVeil,
       sat: next.bgSat,
@@ -417,7 +471,11 @@ export class Scene {
     }
 
     if (item.isGap) {
-      drawGap(canvas, item, this.size, this.stage.w, this.pGlow, this.pFill, this.maskBlur);
+      const dotRgb: Rgb =
+        this.fxPlan !== null && this.fxPlan.intensity > 0.0
+          ? planInterludeColor(this.fxPlan, this.engine.t)
+          : WHITE;
+      drawGap(canvas, item, this.size, this.stage.w, this.pGlow, this.pFill, this.maskBlur, dotRgb);
     } else if (item.isCredit) {
       drawCredit(canvas, this.fonts, this.creditLayout, this.size, this.pFill);
     } else {
@@ -500,12 +558,67 @@ export class Scene {
       pDstIn: this.pDstIn,
       maskBlur: this.maskBlur,
     };
+    const plan = this.fxPlan;
+    const fxActive = plan !== null && plan.intensity > 0.0;
+    const tNow = this.engine.t;
+    const strainNow = fxActive ? planStrainAt(plan, tNow) : 0.0;
+    const fxEnv = fxActive
+      ? {
+          ck: this.ck,
+          canvas,
+          caches: this.getFxCaches(),
+          fonts: this.fonts,
+          engine: this.engine,
+          plan,
+          probe: plan.adaptBg ? this.getProbe() : null,
+          pDstIn: this.pDstIn,
+          stageLeft: this.stage.x,
+          stageTop: this.stage.y,
+          ref: this.ref,
+          k: this.k,
+        }
+      : null;
+
     rows.forEach((row, ri) => {
       const rw = widths[ri] ?? 0;
       const x0 = item.duet ? lay.width - lay.padR - rw : lay.padL;
       const lt = top + ri * LINE_H * size;
       for (const box of row) {
-        drawWord(wordCtx, canvas, box.word, x0 + box.x, lt, box.width, size, ba, da);
+        const attach = fxEnv ? this.fxByWord.get(box.word) : undefined;
+        const fxItem = attach?.fx ?? attach?.fxLayer ?? null;
+        if (
+          fxEnv === null ||
+          fxItem === null ||
+          isWordFxIdle(box.word, fxItem, tNow, strainNow, this.fxDebug)
+        ) {
+          drawWord(wordCtx, canvas, box.word, x0 + box.x, lt, box.width, size, ba, da);
+          continue;
+        }
+        drawSceneFxWord(
+          fxEnv,
+          item,
+          box.word,
+          fxItem,
+          x0 + box.x,
+          lt,
+          box.width,
+          size,
+          ba,
+          da,
+          strainNow,
+        );
+        if (this.fxDebug && attach?.fx) {
+          drawDebugLabel(
+            canvas,
+            fxEnv.caches,
+            this.fonts,
+            attach.fx,
+            x0 + box.x,
+            box.width,
+            lt + this.fonts.baseline(size),
+            size,
+          );
+        }
       }
     });
   }
@@ -513,6 +626,10 @@ export class Scene {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    this.fxCaches?.dispose();
+    this.fxCaches = null;
+    this.probe?.dispose();
+    this.probe = null;
     this.clearBloomCache();
     for (const mf of this.maskBlurCache.values()) mf.delete();
     this.maskBlurCache.clear();
