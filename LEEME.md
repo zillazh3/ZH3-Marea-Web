@@ -203,7 +203,5 @@ Spotify, TikTok y Apple Music son marcas de sus respectivos dueños. Este proyec
 [GNU AGPL-3.0](LICENSE). Si modificas esta app y la pones a disposición de otras personas por red, debes publicar tus cambios
 bajo la misma licencia.
 
-<!-- Reemplaza SUBDOMAIN por el subdominio de workers.dev cuando el sitio esté desplegado (también en README.md). -->
-
-[live]: https://zh3marea.SUBDOMAIN.workers.dev/
-[live-privacidad]: https://zh3marea.SUBDOMAIN.workers.dev/privacidad/
+[live]: https://zh3marea.thezillax.workers.dev/
+[live-privacidad]: https://zh3marea.thezillax.workers.dev/privacidad/

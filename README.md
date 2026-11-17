@@ -199,7 +199,5 @@ Spotify, TikTok and Apple Music are trademarks of their owners. This project is 
 [GNU AGPL-3.0](LICENSE). If you modify this app and let people use it over a network, you must publish your changes under the
 same license.
 
-<!-- Replace SUBDOMAIN with the workers.dev account subdomain once the site is deployed (also in LEEME.md). -->
-
-[live]: https://zh3marea.SUBDOMAIN.workers.dev/
-[live-privacy]: https://zh3marea.SUBDOMAIN.workers.dev/en/privacy/
+[live]: https://zh3marea.thezillax.workers.dev/
+[live-privacy]: https://zh3marea.thezillax.workers.dev/en/privacy/
