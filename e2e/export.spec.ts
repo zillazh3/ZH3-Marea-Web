@@ -2,9 +2,9 @@ import { expect, test, type Page } from '@playwright/test';
 import type { ExportRunResult } from '@/export/exportClient';
 
 async function openDemoInEditor(page: Page): Promise<void> {
-  await page.goto('/');
+  await page.goto('/app/');
   await page.getByRole('button', { name: 'Probar con la canción demo' }).click();
-  await expect(page).toHaveURL(/\/editor$/);
+  await expect(page).toHaveURL(/\/app\/#editor$/);
   await expect(page.getByRole('main').getByRole('button', { name: 'Reproducir' })).toBeEnabled({
     timeout: 20_000,
   });
@@ -21,7 +21,7 @@ test.describe('export', () => {
     page,
   }) => {
     test.setTimeout(90_000);
-    await page.goto('/');
+    await page.goto('/app/');
 
     await page.addScriptTag({
       type: 'module',
@@ -114,7 +114,7 @@ test.describe('export', () => {
 
     const navLink = page.getByRole('link', { name: /Exportaciones/ });
     await navLink.click();
-    await expect(page).toHaveURL(/\/exports$/);
+    await expect(page).toHaveURL(/\/app\/#exports$/);
 
     const downloadBtn = page.getByRole('button', { name: 'Descargar' });
     await expect(downloadBtn).toBeVisible({ timeout: 90_000 });

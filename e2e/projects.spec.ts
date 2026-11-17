@@ -38,31 +38,31 @@ async function pickWith(
 
 test.describe('opening lyrics', () => {
   test('opens the demo song, keeps it in the library and survives a reload', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await page.getByRole('button', { name: 'Probar con la canción demo' }).click();
 
-    await expect(page).toHaveURL(/\/editor$/);
+    await expect(page).toHaveURL(/\/app\/#editor$/);
     await expect(page.getByRole('heading', { level: 2, name: 'Marea de luz' })).toBeVisible();
     await expect(page.getByText('Abrí «Marea de luz» en el Editor')).toBeVisible();
 
     await page.reload();
-    await page.goto('/library');
+    await page.goto('/app/#library');
     await expect(page.getByRole('button', { name: 'Abrir Marea de luz' })).toBeVisible();
-    await page.goto('/');
+    await page.goto('/app/');
     await expect(page.getByRole('button', { name: 'Abrir Marea de luz' })).toBeVisible();
   });
 
   test('opens a .ttml file and names the project after the file', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await pickWith(page, 'Abrir .ttml', TTML);
 
-    await expect(page).toHaveURL(/\/editor$/);
+    await expect(page).toHaveURL(/\/app\/#editor$/);
     await expect(page.getByRole('heading', { level: 2, name: 'marea-de-luz' })).toBeVisible();
     await expect(page.getByText('Letra por sílaba')).toBeVisible();
   });
 
   test('explains what is wrong with a file that is not lyrics', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await pickWith(page, 'Abrir .ttml', {
       name: 'notas.ttml',
       mimeType: 'text/plain',
@@ -70,7 +70,7 @@ test.describe('opening lyrics', () => {
     });
 
     await expect(page.getByText(/no es un TTML válido/)).toBeVisible();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/app\/#home$/);
   });
 
   test('imports a desktop .marea.json and downloads it back unchanged in substance', async ({
@@ -84,11 +84,11 @@ test.describe('opening lyrics', () => {
       editor: unknown;
     };
 
-    await page.goto('/');
+    await page.goto('/app/');
     await pickWith(page, 'Abrir proyecto', RICH_PROJECT);
     await expect(page.getByRole('heading', { level: 2, name: original.title })).toBeVisible();
 
-    await page.goto('/library');
+    await page.goto('/app/#library');
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Descargar .marea.json' }).click();
     const saved = await download;
@@ -103,7 +103,7 @@ test.describe('opening lyrics', () => {
   });
 
   test('refuses a file that is not a ZH3 Marea project', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await pickWith(page, 'Abrir proyecto', {
       name: 'otro.json',
       mimeType: 'application/json',
@@ -115,9 +115,9 @@ test.describe('opening lyrics', () => {
 
 test.describe('library', () => {
   test('deletes a project after a second press', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await page.getByRole('button', { name: 'Probar con la canción demo' }).click();
-    await page.goto('/library');
+    await page.goto('/app/#library');
 
     await page.getByRole('button', { name: 'Eliminar' }).click();
     await expect(page.getByRole('button', { name: '¿Eliminar?' })).toBeVisible();
@@ -127,7 +127,7 @@ test.describe('library', () => {
   });
 
   test('shows the empty state for clips', async ({ page }) => {
-    await page.goto('/library');
+    await page.goto('/app/#library');
     await page.getByRole('button', { name: 'Clips' }).click();
     await expect(page.getByText('Todavía no hay clips')).toBeVisible();
   });
@@ -136,7 +136,7 @@ test.describe('library', () => {
     page,
   }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    await page.goto('/library');
+    await page.goto('/app/#library');
 
     const filterBox = await page.getByRole('group', { name: 'Filtrar biblioteca' }).boundingBox();
     const settingsBox = await page.getByRole('link', { name: 'Ajustes' }).boundingBox();
@@ -182,7 +182,7 @@ test.describe('search', () => {
 
   test('lists results with their lyrics badge and opens one', async ({ page }) => {
     await page.route('https://lrclib.net/api/search*', (route) => mock(route, 200, TRACKS));
-    await page.goto('/search');
+    await page.goto('/app/#search');
     await page.getByRole('searchbox', { name: 'Buscar canción' }).fill('marea');
 
     await expect(page.getByText('Marea alta')).toBeVisible();
@@ -191,20 +191,20 @@ test.describe('search', () => {
     await expect(page.getByRole('button', { name: 'Crear clip' }).last()).toBeDisabled();
 
     await page.getByRole('button', { name: 'Crear clip' }).first().click();
-    await expect(page).toHaveURL(/\/editor$/);
+    await expect(page).toHaveURL(/\/app\/#editor$/);
     await expect(page.getByRole('heading', { level: 2, name: 'Marea alta' })).toBeVisible();
   });
 
   test('says so when nothing matches', async ({ page }) => {
     await page.route('https://lrclib.net/api/search*', (route) => mock(route, 200, []));
-    await page.goto('/search');
+    await page.goto('/app/#search');
     await page.getByRole('searchbox', { name: 'Buscar canción' }).fill('zzzz');
     await expect(page.getByText('No encontré resultados')).toBeVisible();
   });
 
   test('explains a service outage', async ({ page }) => {
     await page.route('https://lrclib.net/api/search*', (route) => mock(route, 503, {}));
-    await page.goto('/search');
+    await page.goto('/app/#search');
     await page.getByRole('searchbox', { name: 'Buscar canción' }).fill('marea');
     await expect(page.getByRole('alert')).toHaveText(/LRCLIB está ocupado/);
   });
@@ -213,7 +213,7 @@ test.describe('search', () => {
 test.describe('settings', () => {
   test('keeps the Spicy Lyrics key and tests it', async ({ page }) => {
     await page.route('https://api.spicylyrics.org/**', (route) => mock(route, 200, {}));
-    await page.goto('/settings');
+    await page.goto('/app/#settings');
     await page.getByLabel('Clave de acceso').fill('sl_pk_prueba');
     await page.getByRole('button', { name: 'Probar clave' }).click();
     await expect(page.getByText('La clave funciona')).toBeVisible();
@@ -224,14 +224,14 @@ test.describe('settings', () => {
 
   test('says when Spicy rejects the key', async ({ page }) => {
     await page.route('https://api.spicylyrics.org/**', (route) => mock(route, 401, {}));
-    await page.goto('/settings');
+    await page.goto('/app/#settings');
     await page.getByLabel('Clave de acceso').fill('mala');
     await page.getByRole('button', { name: 'Probar clave' }).click();
     await expect(page.getByText(/Spicy Lyrics no aceptó la clave/)).toBeVisible();
   });
 
   test('switches language by hand and remembers it', async ({ page }) => {
-    await page.goto('/settings');
+    await page.goto('/app/#settings');
     await page.getByLabel('Idioma').selectOption('en');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Settings');
     await page.reload();
@@ -243,7 +243,7 @@ test.describe('english system', () => {
   test.use({ locale: 'en-US' });
 
   test('detects the language and localizes errors', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Home');
     await pickWith(page, 'Open .ttml', {
       name: 'x.ttml',
@@ -256,7 +256,7 @@ test.describe('english system', () => {
 
 test.describe('browser storage', () => {
   test('writes and reads a large file in the origin private file system', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     const result = await page.evaluate(async () => {
       const path = '/src/features/storage/opfs.ts'; // served by the dev server; a variable keeps the bundler out of it
       const { writeFile, readFile, removeFile } = (await import(

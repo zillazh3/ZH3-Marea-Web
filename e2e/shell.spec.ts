@@ -12,7 +12,7 @@ async function railWidth(page: Page): Promise<number> {
 
 test.describe('navigation', () => {
   test('marks the active screen and moves the tide with it', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     const rail = page.getByRole('navigation', { name: 'Principal' });
     await expect(rail.getByRole('link', { name: 'Inicio' })).toHaveAttribute(
       'aria-current',
@@ -20,7 +20,7 @@ test.describe('navigation', () => {
     );
 
     await rail.getByRole('link', { name: 'Biblioteca' }).click();
-    await expect(page).toHaveURL(/\/library$/);
+    await expect(page).toHaveURL(/\/app\/#library$/);
     await expect(rail.getByRole('link', { name: 'Biblioteca' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -36,7 +36,7 @@ test.describe('navigation', () => {
   });
 
   test('moves focus between items with the arrow keys', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     const rail = page.getByRole('navigation', { name: 'Principal' });
     await rail.getByRole('link', { name: 'Inicio' }).focus();
     await page.keyboard.press('ArrowDown');
@@ -49,7 +49,7 @@ test.describe('navigation', () => {
 
 test.describe('command palette', () => {
   test('opens with Ctrl+K, filters ignoring accents and navigates with Enter', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await page.keyboard.press('Control+k');
     const palette = page.getByRole('dialog', { name: 'Buscar o ir a' });
     await expect(palette).toBeVisible();
@@ -59,12 +59,12 @@ test.describe('command palette', () => {
     await expect(palette.getByRole('option')).toHaveCount(1);
     await page.keyboard.press('Enter');
 
-    await expect(page).toHaveURL(/\/exports$/);
+    await expect(page).toHaveURL(/\/app\/#exports$/);
     await expect(palette).toBeHidden();
   });
 
   test('explains when nothing matches and closes with Escape', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await page.getByRole('button', { name: /Buscar o ir a/ }).click();
     const palette = page.getByRole('dialog', { name: 'Buscar o ir a' });
     await palette.getByRole('combobox').fill('zzz');
@@ -77,7 +77,7 @@ test.describe('command palette', () => {
   });
 
   test('runs actions from the list', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await page.keyboard.press('Control+k');
     await page.getByRole('combobox').fill('tema');
     await page.getByRole('option', { name: /Cambiar tema/ }).click();
@@ -87,7 +87,7 @@ test.describe('command palette', () => {
 
 test.describe('rail', () => {
   test('collapses and expands with Ctrl+B and remembers the choice', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await expect.poll(() => railWidth(page)).toBe(RAIL_EXPANDED);
 
     await page.keyboard.press('Control+b');
@@ -102,7 +102,7 @@ test.describe('rail', () => {
 
   test('starts collapsed below 1200px unless the user chose otherwise', async ({ page }) => {
     await page.setViewportSize({ width: 1100, height: 800 });
-    await page.goto('/');
+    await page.goto('/app/');
     await expect.poll(() => railWidth(page)).toBe(RAIL_COLLAPSED);
 
     await page.getByRole('button', { name: 'Expandir menú' }).click();
@@ -110,14 +110,14 @@ test.describe('rail', () => {
   });
 
   test('shows a tooltip for collapsed items', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await page.keyboard.press('Control+b');
     await page.getByRole('link', { name: 'Biblioteca' }).hover();
     await expect(page.locator('.tip.visible')).toHaveText('Biblioteca');
   });
 
   test('shows the export count and progress from the queue', async ({ page }) => {
-    await page.goto('/?seed');
+    await page.goto('/app/?seed');
     const link = page.getByRole('link', { name: /Exportaciones/ });
     await expect(link.getByText('2 trabajos en cola')).toBeAttached();
     await expect(link.locator('.ring')).toBeVisible();
@@ -128,7 +128,7 @@ test.describe('dock', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('moves the navigation to the bottom and drops the rail header', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     const nav = page.getByRole('navigation', { name: 'Principal' });
     const box = await nav.boundingBox();
     expect(box).not.toBeNull();
@@ -140,14 +140,14 @@ test.describe('dock', () => {
   });
 
   test('reaches Ajustes from the top corner', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await page.getByRole('link', { name: 'Ajustes' }).click();
-    await expect(page).toHaveURL(/\/settings$/);
+    await expect(page).toHaveURL(/\/app\/#settings$/);
   });
 
   test('uses the dock on a phone held sideways', async ({ page }) => {
     await page.setViewportSize({ width: 844, height: 390 });
-    await page.goto('/');
+    await page.goto('/app/');
     const nav = page.getByRole('navigation', { name: 'Principal' });
     await expect(nav.getByRole('link')).toHaveCount(5);
     const box = await nav.boundingBox();
@@ -156,7 +156,7 @@ test.describe('dock', () => {
   });
 
   test('shows the mini player above the dock', async ({ page }) => {
-    await page.goto('/?seed');
+    await page.goto('/app/?seed');
     const player = page.getByRole('group', { name: 'Sonando ahora' });
     await expect(player).toBeVisible();
     await player.getByRole('button', { name: 'Pausar' }).click();
@@ -166,7 +166,7 @@ test.describe('dock', () => {
 
 test.describe('theme', () => {
   test('toggles between light and dark and persists the choice', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
     await page.getByRole('button', { name: 'Cambiar a tema claro' }).click();
@@ -178,7 +178,7 @@ test.describe('theme', () => {
 
   test('follows the system theme until the user picks one', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
-    await page.goto('/');
+    await page.goto('/app/');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
 });
@@ -187,7 +187,7 @@ test.describe('reduced motion', () => {
   test.use({ reducedMotion: 'reduce' });
 
   test('removes the tide transition', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/app/');
     await page.getByRole('link', { name: 'Buscar', exact: true }).click();
     const duration = await page
       .locator('.tide')

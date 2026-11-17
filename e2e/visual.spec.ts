@@ -13,7 +13,7 @@ for (const size of SIZES) {
     test(`shell ${size.name} ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
       await page.setViewportSize({ width: size.width, height: size.height });
-      await page.goto('/?seed');
+      await page.goto('/app/?seed');
       await page.evaluate(() => document.fonts.ready);
       await expect(page).toHaveScreenshot(`shell-${size.name}-${colorScheme}.png`, {
         animations: 'disabled',

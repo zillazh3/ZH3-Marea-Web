@@ -25,9 +25,9 @@ function makeWavBuffer(durationSec = 0.6, sampleRate = 48000): Buffer {
 }
 
 async function openDemoInEditor(page: Page): Promise<void> {
-  await page.goto('/');
+  await page.goto('/app/');
   await page.getByRole('button', { name: 'Probar con la canción demo' }).click();
-  await expect(page).toHaveURL(/\/editor$/);
+  await expect(page).toHaveURL(/\/app\/#editor$/);
   await expect(page.getByRole('main').getByRole('button', { name: 'Reproducir' })).toBeEnabled({
     timeout: 20_000,
   });
@@ -169,7 +169,7 @@ test.describe('editor', () => {
   test('enables experimental wordfx in Settings and shows intensity/debug controls in Style tab', async ({
     page,
   }) => {
-    await page.goto('/settings');
+    await page.goto('/app/#settings');
     const toggle = page.getByRole('switch', { name: 'Efectos semánticos por palabra' });
     await expect(toggle).toHaveAttribute('aria-checked', 'false');
     await toggle.click();

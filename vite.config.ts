@@ -27,6 +27,9 @@ export default defineConfig({
   base: '/',
   plugins: [svelte(), zh3mareaPwaPlugin(), trailingSlashRedirectPlugin()],
   worker: { format: 'es' },
+  optimizeDeps: {
+    entries: ['app/index.html', 'src/render/preview.worker.ts', 'src/export/export.worker.ts'],
+  },
   build: {
     rolldownOptions: {
       input: {

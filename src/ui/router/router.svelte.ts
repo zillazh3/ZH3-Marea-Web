@@ -1,8 +1,9 @@
 import { appUrlFor, hasSpotifyCallbackQuery, hashFor, routeFromHash, type RouteId } from './routes';
 
 const initial = routeFromHash(location.hash);
+const initialCallback = hasSpotifyCallbackQuery(location.search);
 let current = $state<RouteId>(initial);
-let callbackActive = $state(hasSpotifyCallbackQuery(location.search));
+let callbackActive = $state(initialCallback);
 
 function syncFromLocation(): void {
   current = routeFromHash(location.hash);
@@ -12,7 +13,7 @@ window.addEventListener('hashchange', syncFromLocation);
 window.addEventListener('popstate', syncFromLocation);
 
 // Normalize the address bar (empty or unknown hash) without dropping OAuth callback params before Callback reads them.
-if (!callbackActive) {
+if (!initialCallback) {
   history.replaceState(history.state, '', appUrlFor(initial, location.search));
 }
 
