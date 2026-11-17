@@ -4,18 +4,6 @@ test.describe('data hygiene', () => {
   test('"Borrar todos mis datos" lists what goes, offers a backup and clears every store', async ({
     page,
   }) => {
-    // The app registers a fresh service worker as soon as it reloads, so watch the unregister call instead of the end state.
-    const unregistered: string[] = [];
-    await page.exposeFunction('reportUnregister', (scope: string) => unregistered.push(scope));
-    await page.addInitScript(() => {
-      const original = ServiceWorkerRegistration.prototype.unregister;
-      ServiceWorkerRegistration.prototype.unregister = function unregister() {
-        (window as unknown as { reportUnregister: (scope: string) => void }).reportUnregister(
-          this.scope,
-        );
-        return original.call(this);
-      };
-    });
     await page.goto('/app/');
     await page.getByRole('button', { name: 'Probar con la canción demo' }).click();
     await expect(page).toHaveURL(/\/app\/#editor$/);
@@ -38,22 +26,43 @@ test.describe('data hygiene', () => {
 
     await dialog.getByRole('button', { name: 'Cancelar' }).click();
     await expect(dialog).toBeHidden();
-    await expect(page.evaluate(() => localStorage.length)).resolves.toBeGreaterThan(0);
+    expect(await page.evaluate(() => localStorage.length)).toBeGreaterThan(0);
 
+    // The wipe ends by loading /app/ again, which registers a fresh service worker. Serve a blank page there to inspect the end state.
+    await page.route('**/app/', (route) =>
+      route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>blank</title>' }),
+    );
     await page.getByRole('button', { name: 'Borrar todos mis datos' }).click();
     await dialog.getByRole('button', { name: 'Borrar todo' }).click();
-    await page.waitForURL(/\/app\/$/);
-    await expect(page.getByRole('button', { name: 'Probar con la canción demo' })).toBeVisible();
 
-    const left = await page.evaluate(async () => ({
-      local: localStorage.length,
-      session: sessionStorage.length,
-    }));
-    expect(left.local).toBe(0);
-    expect(left.session).toBe(0);
-    // The fresh page load recreates an empty database, so check that it holds no project.
+    await expect
+      .poll(() =>
+        page.evaluate(async () => ({
+          local: localStorage.length,
+          session: sessionStorage.length,
+          databases: (await indexedDB.databases()).map((db) => db.name),
+          caches: await caches.keys(),
+          registrations: (await navigator.serviceWorker.getRegistrations()).length,
+          opfs: await (async () => {
+            const names: string[] = [];
+            for await (const name of (await navigator.storage.getDirectory()).keys()) {
+              names.push(name);
+            }
+            return names;
+          })(),
+        })),
+      )
+      .toEqual({
+        local: 0,
+        session: 0,
+        databases: [],
+        caches: [],
+        registrations: 0,
+        opfs: [],
+      });
+
+    await page.unroute('**/app/');
     await page.goto('/app/#library');
     await expect(page.getByRole('button', { name: 'Abrir Marea de luz' })).toHaveCount(0);
-    expect(unregistered.some((scope) => scope.endsWith('/app/'))).toBe(true);
   });
 });
