@@ -15,7 +15,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   theme: 'system',
   railCollapsed: null,
   locale: 'auto',
-  wordfxExperimental: false,
+  wordfxExperimental: true,
 };
 
 export const PREFERENCES_KEY = 'zh3marea.preferences';

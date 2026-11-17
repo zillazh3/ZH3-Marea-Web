@@ -166,11 +166,11 @@ test.describe('editor', () => {
     expect(overflow).toBe(false);
   });
 
-  test('enables experimental wordfx in Settings and shows intensity/debug controls in Style tab', async ({
-    page,
-  }) => {
+  test('toggles semantic wordfx in Settings and updates Style tab controls', async ({ page }) => {
     await page.goto('/app/#settings');
     const toggle = page.getByRole('switch', { name: 'Efectos semánticos por palabra' });
+    await expect(toggle).toHaveAttribute('aria-checked', 'true');
+    await toggle.click();
     await expect(toggle).toHaveAttribute('aria-checked', 'false');
     await toggle.click();
     await expect(toggle).toHaveAttribute('aria-checked', 'true');

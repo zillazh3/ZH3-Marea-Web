@@ -3,13 +3,6 @@
  * Mirrors marea/ui/theme.py of the desktop app, with the softer radii and motion of the approved web mockup.
  */
 
-@font-face {
-  font-family: 'Inter Tight';
-  src: url('../fonts/InterTight-Variable.ttf') format('truetype');
-  font-weight: 100 900;
-  font-display: swap;
-}
-
 :root {
   color-scheme: dark;
 
@@ -162,4 +155,48 @@
   :root {
     --dock-clearance: 96px;
   }
+}
+
+/* Landing page tokens (shared base colors, gradients, and easings live above). */
+:root {
+  --teal: #2fc6d9;
+  --landing-panel: rgba(19, 18, 38, 0.86);
+  --landing-line: rgba(255, 255, 255, 0.09);
+  --landing-muted: rgba(244, 243, 250, 0.64);
+  --landing-header-bg: rgba(18, 16, 36, 0.55);
+  --landing-surface-hover: rgba(255, 255, 255, 0.06);
+  --landing-track-bg: rgba(255, 255, 255, 0.08);
+  --landing-btn-shadow: 0 14px 40px -16px var(--accent);
+  --landing-phone-top: #2a2840;
+  --landing-phone-bottom: #0c0b16;
+  --landing-phone-island: #05040a;
+  --landing-phone-shadow:
+    inset 0 0 0 1px var(--border), 0 50px 120px -40px rgba(43, 86, 255, 0.55),
+    0 30px 60px -30px var(--shadow-color-strong);
+  --landing-clip-bg: #110f24;
+  --landing-clip-text-dim: rgba(255, 255, 255, 0.3);
+  --landing-clip-text-past: rgba(255, 255, 255, 0.62);
+  --landing-clip-text-upcoming: rgba(255, 255, 255, 0.34);
+  --landing-clip-glow: rgba(255, 255, 255, 0.45);
+  --landing-hero-glow-1: rgba(43, 86, 255, 0.32);
+  --landing-hero-glow-2: rgba(106, 53, 255, 0.28);
+  --landing-closing-glow: rgba(43, 86, 255, 0.35);
+  --landing-wordmark-ghost: rgba(244, 243, 250, 0.05);
+  --landing-wordmark-stroke: rgba(244, 243, 250, 0.22);
+  --landing-watch-border: rgba(255, 255, 255, 0.28);
+  --landing-callout-line: rgba(244, 243, 250, 0.32);
+  --landing-callout-ring: rgba(123, 147, 255, 0.18);
+  --landing-syllable-upcoming: rgba(244, 243, 250, 0.16);
+  --landing-syllable-singing-glow: rgba(255, 255, 255, 0.35);
+  --landing-fx-water: #9db2ff;
+  --landing-fx-water-glow: rgba(110, 150, 255, 0.55);
+  --landing-fx-light: #ffe2a8;
+  --landing-fx-light-glow: rgba(255, 206, 120, 0.65);
+  --landing-sea-back: rgba(106, 53, 255, 0.3);
+  --landing-sea-front: rgba(43, 86, 255, 0.28);
+  --landing-sea-body-top: rgba(43, 86, 255, 0.22);
+  --landing-sea-body-mid: rgba(106, 53, 255, 0.12);
+  --landing-platform-accent-1: #9db2ff;
+  --landing-platform-accent-2: #b79cff;
+  --landing-scrim-base: #06050e;
 }

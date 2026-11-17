@@ -20,13 +20,13 @@ describe('loadPreferences', () => {
       theme: 'light',
       railCollapsed: true,
       locale: 'en',
-      wordfxExperimental: true,
+      wordfxExperimental: false,
     });
     expect(loadPreferences(storageWith(stored))).toEqual({
       theme: 'light',
       railCollapsed: true,
       locale: 'en',
-      wordfxExperimental: true,
+      wordfxExperimental: false,
     });
   });
 

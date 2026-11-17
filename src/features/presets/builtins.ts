@@ -1,7 +1,7 @@
-import abisalJson from './builtins/Abisal.json';
-import bajamarJson from './builtins/Bajamar.json';
-import nieblaJson from './builtins/Niebla.json';
-import pleamarJson from './builtins/Pleamar.json';
+import abisalJson from '@/shared/data/presets/Abisal.json';
+import bajamarJson from '@/shared/data/presets/Bajamar.json';
+import nieblaJson from '@/shared/data/presets/Niebla.json';
+import pleamarJson from '@/shared/data/presets/Pleamar.json';
 import { validatePreset, type PresetDocument } from './schema';
 
 export interface PresetEntry {
