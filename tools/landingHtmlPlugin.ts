@@ -1,4 +1,5 @@
 import type { Plugin } from 'vite';
+import { resolveSiteConfig } from '../src/shared/site';
 import {
   renderLandingHtml,
   renderNotFoundHtml,
@@ -68,6 +69,12 @@ export function zh3mareaLandingPlugin(): Plugin {
             );
           }
         }
+      }
+      if (!process.env.VITE_SITE_URL) {
+        this.warn(
+          'VITE_SITE_URL is not set: canonical, hreflang, Open Graph, robots.txt and sitemap.xml use the placeholder ' +
+            `${resolveSiteConfig().siteUrl}. Set it to the real address before deploying (docs/deploy.md).`,
+        );
       }
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: renderRobotsTxt() });
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: renderSitemapXml() });

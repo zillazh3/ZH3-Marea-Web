@@ -5,7 +5,7 @@ and export a 60 fps MP4 (1080x1920, 1080x1080 or 1920x1080). This is the web ver
 
 **Privacy:** everything stays on your device. There is no backend and there are no accounts. Projects, settings, audio files and
 exports live in your browser's storage. The only network calls go to the lyrics and music services you choose to use
-(LRCLIB, Spicy Lyrics, Spotify).
+(LRCLIB, Spicy Lyrics, Spotify). Details: `docs/privacy-and-storage.md`, and the public pages `/privacidad/` and `/en/privacy/`.
 
 Status: early development. See `tasks/todo.md` for progress and `docs/decisions/` for the reasoning behind each choice.
 
@@ -22,7 +22,10 @@ npm run dev        # http://127.0.0.1:5173
 |---|---|
 | `npm run check` | typecheck, lint, format check and unit tests |
 | `npm run test:e2e` | Playwright end-to-end tests (first time: `npx playwright install chromium`) |
+| `npm run test:e2e:static` | builds, serves `dist/` through `wrangler dev` and fails on any CSP violation or console error |
 | `npm run build` | production build in `dist/` |
+| `npm run preview:static` | builds and serves `dist/` with the real `_headers` at `http://127.0.0.1:8787` |
+| `npm run smoke -- <url>` | post-deploy checks: pages, `/app` redirect, 404 page, security headers |
 | `npm run format` | format the code with Prettier |
 
 The dev server binds `127.0.0.1` because Spotify does not accept `localhost` redirect URIs.
@@ -59,12 +62,11 @@ Imports point inward only (left to right above is the allowed direction of depen
 
 ## Deploy
 
-Cloudflare Workers with static assets on the free `workers.dev` subdomain (see `wrangler.jsonc`, `public/_headers`, and `docs/decisions/0007-hosting.md`). Nothing in the source depends on a fixed domain:
+Cloudflare Workers with static assets on the free `workers.dev` subdomain: no Worker script, no SPA fallback (`wrangler.jsonc`,
+`public/_headers`, `docs/decisions/0007-hosting.md`). Nothing in the source depends on a fixed domain.
 
-1. Optional build env var: set `VITE_SOURCE_URL=https://github.com/<owner>/<repo>` before building to expose the "Código fuente" link in Ajustes and the app footer (satisfies GNU AGPL-3.0 network notice).
-2. Authenticate Wrangler once (`npx wrangler login`) and inspect `npm run build` (`dist/` includes the landing pages, `/app/` PWA manifest, icons, `_headers`, and `/app/sw.js`).
-3. Deploy only when ready: `npm run deploy` (`npm run build && npx wrangler deploy`).
-4. In Spotify for Developers, add `${origin}/app/` (shown with a Copy button in Ajustes; `http://127.0.0.1:5173/app/` in local dev) as a Redirect URI. The PWA installs from Chrome/Edge/Android and caches the `/app/` shell, fonts, and WASM (lazily after first editor open) for offline use.
+`npm run deploy` runs the checks, builds and runs `wrangler deploy`; run it only when you mean to publish. Step by step (first
+deploy, auto-deploy with Workers Builds, Spotify Redirect URIs, rollback, custom domain, `VITE_SITE_URL`): `docs/deploy.md`.
 
 ## License
 

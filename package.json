@@ -20,6 +20,7 @@
     "test:e2e": "playwright test",
     "test:e2e:static": "npm run build && playwright test -c playwright.static.config.ts",
     "preview:static": "npm run build && wrangler dev --ip 127.0.0.1 --port 8787",
+    "smoke": "node tools/smoke.mjs",
     "deploy": "npm run check && npm run build && wrangler deploy"
   },
   "dependencies": {
