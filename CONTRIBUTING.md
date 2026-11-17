@@ -13,6 +13,9 @@ npm install
 npm run dev
 ```
 
+On Windows, Git may convert line endings on checkout (`core.autocrlf=true`) and `npm run check` then fails on formatting. Clone
+with `git clone --config core.autocrlf=false ...` so files keep LF, as the [.editorconfig](.editorconfig) expects.
+
 The app is at `http://127.0.0.1:5173/app/` and the landing page at `http://127.0.0.1:5173/`. The dev server uses `127.0.0.1`
 because Spotify does not accept `localhost` redirect URIs. Spotify is optional; see "Spotify" in the [README](README.md).
 
