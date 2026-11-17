@@ -24,7 +24,7 @@ export function buildPrecacheList(bundleFileNames: readonly string[]): string[] 
       clean === '_headers' ||
       clean === 'index.html' ||
       clean === 'en/index.html' ||
-      clean.startsWith('assets/landing')
+      /^assets\/(?:main|en|landing|InterTight-Latin)-/i.test(clean)
     ) {
       continue;
     }

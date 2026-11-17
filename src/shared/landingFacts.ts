@@ -1,4 +1,4 @@
-import rawWordfxLibrary from '@/assets/wordfx/library.json';
+import rawWordfxLibrary from '../assets/wordfx/library.json';
 import abisalPreset from './data/presets/Abisal.json';
 import bajamarPreset from './data/presets/Bajamar.json';
 import nieblaPreset from './data/presets/Niebla.json';

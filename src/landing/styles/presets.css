@@ -1,0 +1,25 @@
+/* Auto-synced from src/shared/data/presets/*.json via src/shared/landingFacts.ts */
+[data-preset='bajamar'] {
+  --text-size: 19px;
+  --glow: 0.63;
+  --blur: 0px;
+  --dim: 0.22;
+}
+[data-preset='pleamar'] {
+  --text-size: 22px;
+  --glow: 1;
+  --blur: 0px;
+  --dim: 0.18;
+}
+[data-preset='niebla'] {
+  --text-size: 19px;
+  --glow: 0.5;
+  --blur: 14px;
+  --dim: 0.3;
+}
+[data-preset='abisal'] {
+  --text-size: 19px;
+  --glow: 0.81;
+  --blur: 0px;
+  --dim: 0.5;
+}

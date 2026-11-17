@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
+import { zh3mareaLandingPlugin } from './tools/landingHtmlPlugin';
 import { zh3mareaPwaPlugin } from './tools/pwaPlugin';
 
 function trailingSlashRedirectPlugin(): Plugin {
@@ -25,7 +26,7 @@ function trailingSlashRedirectPlugin(): Plugin {
 
 export default defineConfig({
   base: '/',
-  plugins: [svelte(), zh3mareaPwaPlugin(), trailingSlashRedirectPlugin()],
+  plugins: [svelte(), zh3mareaLandingPlugin(), zh3mareaPwaPlugin(), trailingSlashRedirectPlugin()],
   worker: { format: 'es' },
   optimizeDeps: {
     entries: ['app/index.html', 'src/render/preview.worker.ts', 'src/export/export.worker.ts'],
@@ -33,6 +34,8 @@ export default defineConfig({
   build: {
     rolldownOptions: {
       input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        en: fileURLToPath(new URL('./en/index.html', import.meta.url)),
         app: fileURLToPath(new URL('./app/index.html', import.meta.url)),
       },
     },
