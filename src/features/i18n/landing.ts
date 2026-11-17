@@ -1,5 +1,30 @@
 import type { PresetSlug } from '../../shared/landingFacts';
 
+export interface PrivacyItem {
+  readonly text: string;
+  /** `{repo}` and `{issues}` in `href` are replaced with the configured repository URL at build time. */
+  readonly link?: { readonly label: string; readonly href: string };
+}
+
+export interface PrivacySection {
+  readonly heading: string;
+  readonly paragraphs: readonly string[];
+  readonly items: readonly PrivacyItem[];
+  readonly closing: readonly string[];
+}
+
+export interface LandingPrivacy {
+  readonly path: string;
+  readonly metaTitle: string;
+  readonly metaDescription: string;
+  readonly title: string;
+  readonly intro: string;
+  readonly updatedLabel: string;
+  readonly updatedIso: string;
+  readonly updatedText: string;
+  readonly sections: readonly PrivacySection[];
+}
+
 export interface LandingMessages {
   readonly htmlLang: string;
   readonly meta: {
@@ -104,6 +129,15 @@ export interface LandingMessages {
     readonly otherLanguageName: string;
     readonly otherLanguageHref: string;
     readonly otherLanguageCode: string;
+    readonly privacyLink: string;
+    readonly privacyHref: string;
+  };
+  readonly privacy: LandingPrivacy;
+  readonly notFound: {
+    readonly title: string;
+    readonly body: string;
+    readonly home: string;
+    readonly app: string;
   };
   readonly clipDemo: {
     readonly songTitle: string;
@@ -233,6 +267,117 @@ export const landingEsMX: LandingMessages = {
     otherLanguageName: 'English',
     otherLanguageHref: '/en/',
     otherLanguageCode: 'en',
+    privacyLink: 'Privacidad',
+    privacyHref: '/privacidad/',
+  },
+  privacy: {
+    path: '/privacidad/',
+    metaTitle: 'Privacidad · ZH3 Marea',
+    metaDescription:
+      'ZH3 Marea no tiene cuentas ni servidor propio. Qué se guarda en tu navegador y qué servicios externos contacta tu navegador.',
+    title: 'Privacidad',
+    intro:
+      'ZH3 Marea no tiene cuentas ni servidor propio. No recopilamos, guardamos ni vendemos datos personales. Esta página dice qué hace la app y, como el código es abierto, puedes comprobarlo.',
+    updatedLabel: 'Última actualización:',
+    updatedIso: '2026-11-16',
+    updatedText: '16 de noviembre de 2026',
+    sections: [
+      {
+        heading: 'Lo que se guarda en tu navegador',
+        paragraphs: [
+          'Solo en tu navegador, para este sitio. Nada de esto se envía a un servidor nuestro:',
+        ],
+        items: [
+          {
+            text: 'Tus proyectos (letras, estilo y portada), tus presets de Corrientes y el historial de exportaciones.',
+          },
+          { text: 'El audio que cargas y los videos que exportas.' },
+          { text: 'Tus ajustes: tema, idioma y preferencias de exportación.' },
+          {
+            text: 'Una copia de las letras que ya buscaste, por unos días, para no repetir la consulta.',
+          },
+          {
+            text: 'Si los configuras: tu llave de Spicy Lyrics y la conexión con Spotify (tu Client ID y un token de renovación).',
+          },
+          { text: 'Una copia de la app para abrirla sin conexión.' },
+        ],
+        closing: [
+          'Si borras los datos del sitio en tu navegador, todo esto desaparece. También puedes hacerlo desde Ajustes, con «Borrar todos mis datos».',
+          'Para respaldar un proyecto, usa «Descargar .marea.json» en Biblioteca. El archivo guarda letras, estilo y portada, pero no tu audio: conserva el original.',
+        ],
+      },
+      {
+        heading: 'Tu audio, tus letras y tus videos se quedan en tu dispositivo',
+        paragraphs: [
+          'El audio, las letras y los videos se procesan en tu dispositivo y no se suben a ningún lado.',
+        ],
+        items: [],
+        closing: [],
+      },
+      {
+        heading: 'Servicios externos',
+        paragraphs: [
+          'Tu navegador contacta directamente a estos servicios, sin pasar por nosotros, y ellos ven tu dirección IP. Si no buscas letras ni conectas Spotify o Spicy Lyrics, la app no contacta a ningún tercero.',
+        ],
+        items: [
+          {
+            text: 'LRCLIB (lrclib.net): búsqueda de letras. Recibe el título, artista, álbum y duración de lo que buscas. No publica una política de privacidad; es un proyecto de código abierto.',
+            link: { label: 'Proyecto LRCLIB', href: 'https://github.com/tranxuanthang/lrclib' },
+          },
+          {
+            text: 'Spicy Lyrics (api.spicylyrics.org): letras sílaba por sílaba. Solo si guardas tu llave en Ajustes; recibe tu llave y el ID de la canción en Spotify.',
+            link: {
+              label: 'Política de privacidad de Spicy Lyrics',
+              href: 'https://spicylyrics.org/legal/privacy',
+            },
+          },
+          {
+            text: 'Spotify (accounts.spotify.com, api.spotify.com, i.scdn.co): iniciar sesión, buscar canciones, ver qué escuchas y cargar portadas. Solo si lo conectas en Ajustes con tu propio Client ID.',
+            link: {
+              label: 'Política de privacidad de Spotify',
+              href: 'https://www.spotify.com/legal/privacy-policy/',
+            },
+          },
+        ],
+        closing: [],
+      },
+      {
+        heading: 'Hospedaje',
+        paragraphs: [
+          'El sitio está alojado en Cloudflare. Como cualquier servidor web, recibe datos estándar de cada petición: dirección IP, navegador y página solicitada. Nosotros no añadimos analíticas, cookies, rastreadores ni anuncios.',
+        ],
+        items: [
+          {
+            text: 'Cloudflare:',
+            link: {
+              label: 'Política de privacidad de Cloudflare',
+              href: 'https://www.cloudflare.com/privacypolicy/',
+            },
+          },
+        ],
+        closing: [],
+      },
+      {
+        heading: 'Código abierto y contacto',
+        paragraphs: [
+          'ZH3 Marea es software libre bajo AGPL-3.0, así que cualquiera puede verificar todo lo anterior.',
+        ],
+        items: [
+          { text: 'Código fuente:', link: { label: 'Repositorio en GitHub', href: '{repo}' } },
+          {
+            text: 'Preguntas o reportes:',
+            link: { label: 'Issues del repositorio', href: '{issues}' },
+          },
+        ],
+        closing: [],
+      },
+    ],
+  },
+  notFound: {
+    title: 'Esta página no existe',
+    body: 'La dirección no lleva a ningún lado. Vuelve al inicio o abre la app.',
+    home: 'Ir al inicio',
+    app: 'Abrir la app',
   },
   clipDemo: {
     songTitle: 'Marea alta',
@@ -357,6 +502,114 @@ export const landingEn: LandingMessages = {
     otherLanguageName: 'Español',
     otherLanguageHref: '/',
     otherLanguageCode: 'es-MX',
+    privacyLink: 'Privacy',
+    privacyHref: '/en/privacy/',
+  },
+  privacy: {
+    path: '/en/privacy/',
+    metaTitle: 'Privacy · ZH3 Marea',
+    metaDescription:
+      'ZH3 Marea has no accounts and no server of its own. What is stored in your browser and which external services your browser contacts.',
+    title: 'Privacy',
+    intro:
+      'ZH3 Marea has no accounts and no server of its own. We do not collect, store or sell personal data. This page says what the app does, and since the code is open you can verify it.',
+    updatedLabel: 'Last updated:',
+    updatedIso: '2026-11-16',
+    updatedText: 'November 16, 2026',
+    sections: [
+      {
+        heading: 'What is stored in your browser',
+        paragraphs: [
+          'Only in your browser, for this site. None of it is sent to a server of ours:',
+        ],
+        items: [
+          {
+            text: 'Your projects (lyrics, style and cover), your own Currents presets and your export history.',
+          },
+          { text: 'The audio you load and the videos you export.' },
+          { text: 'Your settings: theme, language and export preferences.' },
+          {
+            text: 'A copy of the lyrics you already searched for, for a few days, so the lookup is not repeated.',
+          },
+          {
+            text: 'If you set them up: your Spicy Lyrics key and the Spotify connection (your Client ID and a refresh token).',
+          },
+          { text: 'A copy of the app so it opens offline.' },
+        ],
+        closing: [
+          'If you clear this site’s data in your browser, all of it disappears. You can also do it from Settings with “Borrar todos mis datos” (delete all my data).',
+          'To back up a project, use “Descargar .marea.json” (download) in Library. The file keeps lyrics, style and cover, but not your audio: keep the original.',
+        ],
+      },
+      {
+        heading: 'Your audio, lyrics and videos stay on your device',
+        paragraphs: [
+          'Audio, lyrics and videos are processed on your device and are never uploaded anywhere.',
+        ],
+        items: [],
+        closing: [],
+      },
+      {
+        heading: 'External services',
+        paragraphs: [
+          'Your browser contacts these services directly, without going through us, and they see your IP address. If you do not search for lyrics or connect Spotify or Spicy Lyrics, the app contacts no third party.',
+        ],
+        items: [
+          {
+            text: 'LRCLIB (lrclib.net): lyrics search. It receives the title, artist, album and duration of what you search for. It does not publish a privacy policy; it is an open-source project.',
+            link: { label: 'LRCLIB project', href: 'https://github.com/tranxuanthang/lrclib' },
+          },
+          {
+            text: 'Spicy Lyrics (api.spicylyrics.org): syllable-synced lyrics. Only if you save your key in Settings; it receives your key and the Spotify track ID.',
+            link: {
+              label: 'Spicy Lyrics privacy policy',
+              href: 'https://spicylyrics.org/legal/privacy',
+            },
+          },
+          {
+            text: 'Spotify (accounts.spotify.com, api.spotify.com, i.scdn.co): sign-in, track search, what you are playing and album covers. Only if you connect it in Settings with your own Client ID.',
+            link: {
+              label: 'Spotify privacy policy',
+              href: 'https://www.spotify.com/legal/privacy-policy/',
+            },
+          },
+        ],
+        closing: [],
+      },
+      {
+        heading: 'Hosting',
+        paragraphs: [
+          'The site is hosted on Cloudflare. Like any web host, it receives standard request data: IP address, browser and the page requested. We add no analytics, cookies, trackers or ads.',
+        ],
+        items: [
+          {
+            text: 'Cloudflare:',
+            link: {
+              label: 'Cloudflare privacy policy',
+              href: 'https://www.cloudflare.com/privacypolicy/',
+            },
+          },
+        ],
+        closing: [],
+      },
+      {
+        heading: 'Open source and contact',
+        paragraphs: [
+          'ZH3 Marea is free software under AGPL-3.0, so anyone can verify all of the above.',
+        ],
+        items: [
+          { text: 'Source code:', link: { label: 'GitHub repository', href: '{repo}' } },
+          { text: 'Questions or reports:', link: { label: 'Repository issues', href: '{issues}' } },
+        ],
+        closing: [],
+      },
+    ],
+  },
+  notFound: {
+    title: 'This page does not exist',
+    body: 'That address leads nowhere. Go back home or open the app.',
+    home: 'Go to the home page',
+    app: 'Open the app',
   },
   clipDemo: {
     songTitle: 'Marea alta',

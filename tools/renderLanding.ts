@@ -75,37 +75,34 @@ function renderCorrienteCard(item: LandingCorriente, m: LandingMessages): string
       </li>`;
 }
 
+export function siteFromEnv(): SiteConfig {
+  return resolveSiteConfig({
+    VITE_SOURCE_URL: process.env.VITE_SOURCE_URL,
+    VITE_SITE_URL: process.env.VITE_SITE_URL,
+    VITE_WINDOWS_RELEASE_URL: process.env.VITE_WINDOWS_RELEASE_URL,
+  });
+}
+
+/** Indexable pages, each with its es-MX and en path. */
+const PAGE_PAIRS = [
+  { es: '/', en: '/en/' },
+  { es: '/privacidad/', en: '/en/privacy/' },
+] as const;
+
 export function renderRobotsTxt(site?: SiteConfig): string {
-  const resolved =
-    site ??
-    resolveSiteConfig({
-      VITE_SOURCE_URL: process.env.VITE_SOURCE_URL,
-      VITE_SITE_URL: process.env.VITE_SITE_URL,
-      VITE_WINDOWS_RELEASE_URL: process.env.VITE_WINDOWS_RELEASE_URL,
-    });
+  const resolved = site ?? siteFromEnv();
   return `User-agent: *\nAllow: /\n\nSitemap: ${resolved.siteUrl}/sitemap.xml\n`;
 }
 
 export function renderSitemapXml(site?: SiteConfig): string {
-  const resolved =
-    site ??
-    resolveSiteConfig({
-      VITE_SOURCE_URL: process.env.VITE_SOURCE_URL,
-      VITE_SITE_URL: process.env.VITE_SITE_URL,
-      VITE_WINDOWS_RELEASE_URL: process.env.VITE_WINDOWS_RELEASE_URL,
-    });
-  const urls = [
-    {
-      loc: `${resolved.siteUrl}/`,
-      altEs: `${resolved.siteUrl}/`,
-      altEn: `${resolved.siteUrl}/en/`,
-    },
-    {
-      loc: `${resolved.siteUrl}/en/`,
-      altEs: `${resolved.siteUrl}/`,
-      altEn: `${resolved.siteUrl}/en/`,
-    },
-  ];
+  const resolved = site ?? siteFromEnv();
+  const urls = PAGE_PAIRS.flatMap((pair) =>
+    [pair.es, pair.en].map((path) => ({
+      loc: `${resolved.siteUrl}${path}`,
+      altEs: `${resolved.siteUrl}${pair.es}`,
+      altEn: `${resolved.siteUrl}${pair.en}`,
+    })),
+  );
   const entries = urls
     .map(
       (entry) => `  <url>
@@ -124,6 +121,205 @@ ${entries}
 `;
 }
 
+const DEFAULT_FONT_HREF = '/src/landing/fonts/InterTight-Latin.woff2';
+
+const LOGO_SVG = `<svg viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="logo-gradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse"><stop class="logo-stop-start" offset="0"/><stop class="logo-stop-end" offset="1"/></linearGradient></defs><path d="M136 0H376C460 0 512 52 512 136V376C512 460 460 512 376 512H136C52 512 0 460 0 376V136C0 52 52 0 136 0Z" fill="url(#logo-gradient)"/><path class="logo-wave" d="M88 176.8C113.2 176.8 118.8 143.2 144 143.2S174.8 176.8 200 176.8 230.8 143.2 256 143.2 286.8 176.8 312 176.8 342.8 143.2 368 143.2 398.8 176.8 424 176.8" fill="none" stroke-width="30" stroke-linecap="round" opacity=".55"/><path class="logo-wave" d="M88 224.8C120.4 224.8 127.6 287.2 160 287.2S199.6 224.8 232 224.8 271.6 287.2 304 287.2 343.6 224.8 376 224.8" fill="none" stroke-width="46" stroke-linecap="round"/><path class="logo-wave" d="M88 335.2C113.2 335.2 118.8 368.8 144 368.8S174.8 335.2 200 335.2 230.8 368.8 256 368.8 286.8 335.2 312 335.2 342.8 368.8 368 368.8 398.8 335.2 424 335.2" fill="none" stroke-width="30" stroke-linecap="round" opacity=".55"/><circle class="logo-dot" cx="430" cy="256" r="24"/></svg>`;
+
+interface PageMeta {
+  readonly title: string;
+  readonly description: string;
+  /** Paths of the page in both languages. Omitted for pages that must not be indexed (404). */
+  readonly paths?: { readonly es: string; readonly en: string; readonly self: string };
+  readonly jsonLd?: string;
+}
+
+function renderHead(
+  m: LandingMessages,
+  site: SiteConfig,
+  page: PageMeta,
+  fontHref: string,
+  extraHead = '',
+): string {
+  const url = (path: string): string => escapeHtml(`${site.siteUrl}${path}`);
+  const ogImage = escapeHtml(`${site.siteUrl}/og-image.png`);
+  const title = escapeHtml(page.title);
+  const description = escapeHtml(page.description);
+  const indexing = page.paths
+    ? `<link rel="canonical" href="${url(page.paths.self)}">
+<link rel="alternate" hreflang="es-MX" href="${url(page.paths.es)}">
+<link rel="alternate" hreflang="en" href="${url(page.paths.en)}">
+<link rel="alternate" hreflang="x-default" href="${url(page.paths.es)}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="${escapeHtml(m.meta.ogLocale)}">
+<meta property="og:title" content="${title}">
+<meta property="og:description" content="${description}">
+<meta property="og:url" content="${url(page.paths.self)}">
+<meta property="og:image" content="${ogImage}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${title}">
+<meta name="twitter:description" content="${description}">
+<meta name="twitter:image" content="${ogImage}">`
+    : '<meta name="robots" content="noindex">';
+  const jsonLd = page.jsonLd ? `\n<script type="application/ld+json">${page.jsonLd}</script>` : '';
+  return `<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>${title}</title>
+<meta name="description" content="${description}">
+<meta name="theme-color" content="#0e0d1a">
+${indexing}
+<link rel="icon" type="image/svg+xml" href="/app/icons/icon.svg">
+<link rel="apple-touch-icon" href="/app/icons/apple-touch-icon.png">
+<link rel="preload" as="font" type="font/woff2" href="${escapeHtml(fontHref)}" crossorigin>
+<link rel="stylesheet" href="/src/landing/styles/landing.css">${jsonLd}${extraHead}
+</head>`;
+}
+
+/** `home` is '' on the landing itself (in-page anchors) and the landing path ('/' or '/en/') on other pages. */
+function renderHeader(m: LandingMessages, site: SiteConfig, home: string): string {
+  const logoHref = home === '' ? '#top' : home;
+  return `<header class="site-header">
+  <a href="${logoHref}" aria-label="${escapeHtml(m.header.logoAria)}">
+    ${LOGO_SVG}
+    ZH3 Marea
+  </a>
+  <nav aria-label="${escapeHtml(m.header.navAria)}">
+    <a href="${home}#como-se-ve">${escapeHtml(m.header.howItLooks)}</a>
+    <a href="${home}#donde">${escapeHtml(m.header.whereToUse)}</a>
+    <a href="${home}#corrientes">${escapeHtml(m.header.currents)}</a>
+    <a href="${home}#codigo">${escapeHtml(m.header.sourceNav)}</a>
+  </nav>
+  <a class="button primary" href="${site.appPath}">${escapeHtml(m.header.openApp)}</a>
+</header>`;
+}
+
+function renderFooter(m: LandingMessages, site: SiteConfig, otherLanguageHref: string): string {
+  return `<footer class="site-footer" id="codigo">
+  <div>
+    <p>${escapeHtml(m.footer.licensePrefix)} <a href="${escapeHtml(site.repoUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(m.footer.sourceLink)}</a>. ${escapeHtml(m.footer.licenseSuffix)}</p>
+    <div class="footer-meta">
+      <p>${escapeHtml(m.footer.disclaimer)}</p>
+      <p><a href="${escapeHtml(m.footer.privacyHref)}">${escapeHtml(m.footer.privacyLink)}</a></p>
+      <p>${escapeHtml(m.footer.languageLabel)} <a href="${escapeHtml(otherLanguageHref)}" hreflang="${escapeHtml(m.footer.otherLanguageCode)}" lang="${escapeHtml(m.footer.otherLanguageCode)}">${escapeHtml(m.footer.otherLanguageName)}</a></p>
+    </div>
+  </div>
+</footer>`;
+}
+
+function renderPrivacySections(m: LandingMessages, site: SiteConfig): string {
+  const href = (raw: string): string =>
+    escapeHtml(raw.replace('{repo}', site.repoUrl).replace('{issues}', `${site.repoUrl}/issues`));
+  const paragraphs = (list: readonly string[]): string =>
+    list.map((text) => `    <p>${escapeHtml(text)}</p>`).join('\n');
+  return m.privacy.sections
+    .map((section, index) => {
+      const items = section.items
+        .map((item) => {
+          const link = item.link
+            ? ` <a href="${href(item.link.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.link.label)}</a>`
+            : '';
+          return `      <li>${escapeHtml(item.text)}${link}</li>`;
+        })
+        .join('\n');
+      const list = items ? `\n    <ul>\n${items}\n    </ul>` : '';
+      const closing = section.closing.length > 0 ? `\n${paragraphs(section.closing)}` : '';
+      return `  <section aria-labelledby="privacy-${String(index)}">
+    <h2 id="privacy-${String(index)}">${escapeHtml(section.heading)}</h2>
+${paragraphs(section.paragraphs)}${list}${closing}
+  </section>`;
+    })
+    .join('\n');
+}
+
+export function renderPrivacyHtml(
+  locale: LandingLocale,
+  options?: { readonly site?: SiteConfig; readonly fontHref?: string },
+): string {
+  const m = landingMessagesFor(locale);
+  const site = options?.site ?? siteFromEnv();
+  const p = m.privacy;
+  const home = locale === 'en' ? '/en/' : '/';
+  const otherPath = locale === 'en' ? '/privacidad/' : '/en/privacy/';
+  const head = renderHead(
+    m,
+    site,
+    {
+      title: p.metaTitle,
+      description: p.metaDescription,
+      paths: { es: '/privacidad/', en: '/en/privacy/', self: p.path },
+    },
+    options?.fontHref ?? DEFAULT_FONT_HREF,
+  );
+  return `<!doctype html>
+<html lang="${m.htmlLang}">
+${head}
+<body>
+
+${renderHeader(m, site, home)}
+
+<main class="doc">
+  <h1>${escapeHtml(p.title)}</h1>
+  <p class="lead">${escapeHtml(p.intro)}</p>
+${renderPrivacySections(m, site)}
+  <p class="updated">${escapeHtml(p.updatedLabel)} <time datetime="${escapeHtml(p.updatedIso)}">${escapeHtml(p.updatedText)}</time></p>
+</main>
+
+${renderFooter(m, site, otherPath)}
+</body>
+</html>
+`;
+}
+
+/** One page for both languages: `not-found.ts` unhides the block that matches `navigator.languages`. */
+export function renderNotFoundHtml(options?: {
+  readonly site?: SiteConfig;
+  readonly fontHref?: string;
+}): string {
+  const site = options?.site ?? siteFromEnv();
+  const es = landingMessagesFor('es-MX');
+  const en = landingMessagesFor('en');
+  const block = (
+    m: LandingMessages,
+    home: string,
+    hidden: boolean,
+  ): string => `  <section class="not-found" lang="${m.htmlLang}" data-locale="${m.htmlLang}"${hidden ? ' hidden' : ''}>
+    <p class="code" aria-hidden="true">404</p>
+    <h1>${escapeHtml(m.notFound.title)}</h1>
+    <p>${escapeHtml(m.notFound.body)}</p>
+    <div class="actions">
+      <a class="button primary" href="${home}">${escapeHtml(m.notFound.home)}</a>
+      <a class="button" href="${site.appPath}">${escapeHtml(m.notFound.app)}</a>
+    </div>
+  </section>`;
+  const head = renderHead(
+    es,
+    site,
+    { title: '404 · ZH3 Marea', description: es.notFound.body },
+    options?.fontHref ?? DEFAULT_FONT_HREF,
+    '\n<script type="module" src="/src/landing/not-found.ts"></script>',
+  );
+  return `<!doctype html>
+<html lang="${es.htmlLang}">
+${head}
+<body>
+<header class="site-header">
+  <a href="/" aria-label="${escapeHtml(es.header.logoAria)}">
+    ${LOGO_SVG}
+    ZH3 Marea
+  </a>
+</header>
+
+<main class="doc">
+${block(es, '/', false)}
+${block(en, '/en/', true)}
+</main>
+</body>
+</html>
+`;
+}
+
 export function renderLandingHtml(
   locale: LandingLocale,
   options?: {
@@ -132,66 +328,31 @@ export function renderLandingHtml(
   },
 ): string {
   const m = landingMessagesFor(locale);
-  const site =
-    options?.site ??
-    resolveSiteConfig({
-      VITE_SOURCE_URL: process.env.VITE_SOURCE_URL,
-      VITE_SITE_URL: process.env.VITE_SITE_URL,
-      VITE_WINDOWS_RELEASE_URL: process.env.VITE_WINDOWS_RELEASE_URL,
-    });
+  const site = options?.site ?? siteFromEnv();
   const canonicalUrl = locale === 'en' ? `${site.siteUrl}/en/` : `${site.siteUrl}/`;
-  const ogImageUrl = `${site.siteUrl}/og-image.png`;
-  const fontHref = options?.fontHref ?? '/src/landing/fonts/InterTight-Latin.woff2';
+  const fontHref = options?.fontHref ?? DEFAULT_FONT_HREF;
   const calloutsHtml = m.hero.callouts
     .map((label) => `          <li>${escapeHtml(label)}</li>`)
     .join('\n');
   const corrientesHtml = LANDING_CORRIENTES.map((item) => renderCorrienteCard(item, m)).join('\n');
+  const head = renderHead(
+    m,
+    site,
+    {
+      title: m.meta.title,
+      description: m.meta.description,
+      paths: { es: '/', en: '/en/', self: locale === 'en' ? '/en/' : '/' },
+      jsonLd: renderJsonLd(m, canonicalUrl, site),
+    },
+    fontHref,
+  );
 
   return `<!doctype html>
 <html lang="${m.htmlLang}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>${escapeHtml(m.meta.title)}</title>
-<meta name="description" content="${escapeHtml(m.meta.description)}">
-<meta name="theme-color" content="#0e0d1a">
-<link rel="canonical" href="${escapeHtml(canonicalUrl)}">
-<link rel="alternate" hreflang="es-MX" href="${escapeHtml(`${site.siteUrl}/`)}">
-<link rel="alternate" hreflang="en" href="${escapeHtml(`${site.siteUrl}/en/`)}">
-<link rel="alternate" hreflang="x-default" href="${escapeHtml(`${site.siteUrl}/`)}">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="${escapeHtml(m.meta.ogLocale)}">
-<meta property="og:title" content="${escapeHtml(m.meta.title)}">
-<meta property="og:description" content="${escapeHtml(m.meta.description)}">
-<meta property="og:url" content="${escapeHtml(canonicalUrl)}">
-<meta property="og:image" content="${escapeHtml(ogImageUrl)}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${escapeHtml(m.meta.title)}">
-<meta name="twitter:description" content="${escapeHtml(m.meta.description)}">
-<meta name="twitter:image" content="${escapeHtml(ogImageUrl)}">
-<link rel="icon" type="image/svg+xml" href="/app/icons/icon.svg">
-<link rel="apple-touch-icon" href="/app/icons/apple-touch-icon.png">
-<link rel="preload" as="font" type="font/woff2" href="${escapeHtml(fontHref)}" crossorigin>
-<link rel="stylesheet" href="/src/landing/styles/landing.css">
-<script type="application/ld+json">${renderJsonLd(m, canonicalUrl, site)}</script>
-</head>
+${head}
 <body>
 
-<header class="site-header">
-  <a href="#top" aria-label="${escapeHtml(m.header.logoAria)}">
-    <svg viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="logo-gradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse"><stop class="logo-stop-start" offset="0"/><stop class="logo-stop-end" offset="1"/></linearGradient></defs><path d="M136 0H376C460 0 512 52 512 136V376C512 460 460 512 376 512H136C52 512 0 460 0 376V136C0 52 52 0 136 0Z" fill="url(#logo-gradient)"/><path class="logo-wave" d="M88 176.8C113.2 176.8 118.8 143.2 144 143.2S174.8 176.8 200 176.8 230.8 143.2 256 143.2 286.8 176.8 312 176.8 342.8 143.2 368 143.2 398.8 176.8 424 176.8" fill="none" stroke-width="30" stroke-linecap="round" opacity=".55"/><path class="logo-wave" d="M88 224.8C120.4 224.8 127.6 287.2 160 287.2S199.6 224.8 232 224.8 271.6 287.2 304 287.2 343.6 224.8 376 224.8" fill="none" stroke-width="46" stroke-linecap="round"/><path class="logo-wave" d="M88 335.2C113.2 335.2 118.8 368.8 144 368.8S174.8 335.2 200 335.2 230.8 368.8 256 368.8 286.8 335.2 312 335.2 342.8 368.8 368 368.8 398.8 335.2 424 335.2" fill="none" stroke-width="30" stroke-linecap="round" opacity=".55"/><circle class="logo-dot" cx="430" cy="256" r="24"/></svg>
-    ZH3 Marea
-  </a>
-  <nav aria-label="${escapeHtml(m.header.navAria)}">
-    <a href="#como-se-ve">${escapeHtml(m.header.howItLooks)}</a>
-    <a href="#donde">${escapeHtml(m.header.whereToUse)}</a>
-    <a href="#corrientes">${escapeHtml(m.header.currents)}</a>
-    <a href="#codigo">${escapeHtml(m.header.sourceNav)}</a>
-  </nav>
-  <a class="button primary" href="${site.appPath}">${escapeHtml(m.header.openApp)}</a>
-</header>
+${renderHeader(m, site, '')}
 
 <nav class="page-progress" aria-label="${escapeHtml(m.pageProgress.navAria)}">
   <ol>
@@ -330,15 +491,7 @@ ${corrientesHtml}
   </section>
 </main>
 
-<footer class="site-footer" id="codigo">
-  <div>
-    <p>${escapeHtml(m.footer.licensePrefix)} <a href="${escapeHtml(site.repoUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(m.footer.sourceLink)}</a>. ${escapeHtml(m.footer.licenseSuffix)}</p>
-    <div class="footer-meta">
-      <p>${escapeHtml(m.footer.disclaimer)}</p>
-      <p>${escapeHtml(m.footer.languageLabel)} <a href="${escapeHtml(m.footer.otherLanguageHref)}" hreflang="${escapeHtml(m.footer.otherLanguageCode)}" lang="${escapeHtml(m.footer.otherLanguageCode)}">${escapeHtml(m.footer.otherLanguageName)}</a></p>
-    </div>
-  </div>
-</footer>
+${renderFooter(m, site, m.footer.otherLanguageHref)}
 
 <template id="clip-template">
   <div class="clip">

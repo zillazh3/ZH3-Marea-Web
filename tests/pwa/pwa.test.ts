@@ -12,7 +12,11 @@ describe('PWA precache manifest and service worker lifecycle (T9.3, /app/ scope)
     const list = buildPrecacheList([
       'index.html',
       'en/index.html',
+      'privacidad/index.html',
+      'en/privacy/index.html',
+      '404.html',
       'app/index.html',
+      'assets/notFound-abc.js',
       'assets/index-abc123.js',
       'assets/index-def456.css',
       'assets/landing-111.js',
@@ -31,6 +35,9 @@ describe('PWA precache manifest and service worker lifecycle (T9.3, /app/ scope)
     expect(list).not.toContain('/');
     expect(list).not.toContain('/index.html');
     expect(list).not.toContain('/en/index.html');
+    expect(list).not.toContain('/404.html');
+    expect(list).not.toContain('/privacidad/index.html');
+    expect(list).not.toContain('/assets/notFound-abc.js');
     expect(list).not.toContain('/assets/landing-111.js');
     expect(list.some((u) => u.endsWith('.wasm'))).toBe(false);
     expect(list.some((u) => u.endsWith('.map'))).toBe(false);

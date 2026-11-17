@@ -22,9 +22,8 @@ export function buildPrecacheList(bundleFileNames: readonly string[]): string[] 
       clean === 'sw.js' ||
       clean === 'app/sw.js' ||
       clean === '_headers' ||
-      clean === 'index.html' ||
-      clean === 'en/index.html' ||
-      /^assets\/(?:main|en|landing|InterTight-Latin)-/i.test(clean)
+      (clean.endsWith('.html') && !clean.startsWith('app/')) ||
+      /^assets\/(?:main|en|landing|notFound|privacy(?:En)?|InterTight-Latin)-/i.test(clean)
     ) {
       continue;
     }

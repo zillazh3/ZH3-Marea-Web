@@ -367,6 +367,9 @@ export const en: Messages = {
     aboutTitle: 'About',
     sourceCode: 'Source code',
     sourceCodeHint: 'GNU AGPL-3.0 license. No backend or ZH3 Marea accounts.',
+    privacy: 'Privacy',
+    privacyHint: 'What is stored in your browser and which external services the app uses.',
+    privacyHref: '/en/privacy/',
   },
   toast: {
     opened: (title) => `Opened "${title}" in the Editor`,

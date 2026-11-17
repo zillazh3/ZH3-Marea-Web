@@ -229,17 +229,20 @@
     <p class="hint">{m.settings.wordfxHint}</p>
   </section>
 
-  {#if sourceUrl}
-    <section class="card">
-      <h2>{m.settings.aboutTitle}</h2>
-      <p class="hint">{m.settings.sourceCodeHint}</p>
-      <div>
+  <section class="card">
+    <h2>{m.settings.aboutTitle}</h2>
+    <p class="hint">{m.settings.sourceCodeHint}</p>
+    <div class="btn-row">
+      {#if sourceUrl}
         <a class="source-link" href={sourceUrl} target="_blank" rel="noopener noreferrer">
           {m.settings.sourceCode}
         </a>
-      </div>
-    </section>
-  {/if}
+      {/if}
+      <a class="source-link" href={m.settings.privacyHref} title={m.settings.privacyHint}>
+        {m.settings.privacy}
+      </a>
+    </div>
+  </section>
 </div>
 
 <style>

@@ -372,6 +372,9 @@ export const esMX = {
     aboutTitle: 'Acerca de',
     sourceCode: 'Código fuente',
     sourceCodeHint: 'Licencia GNU AGPL-3.0. Sin servidor propio ni cuentas de ZH3 Marea.',
+    privacy: 'Privacidad',
+    privacyHint: 'Qué se guarda en tu navegador y qué servicios externos usa la app.',
+    privacyHref: '/privacidad/',
   },
   toast: {
     opened: (title: string) => `Abrí «${title}» en el Editor`,
