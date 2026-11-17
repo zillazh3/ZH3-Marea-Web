@@ -285,6 +285,14 @@ def main():
     write(out, "layout.json", layout_fixture(layout))
     write(out, "motion.json", motion_fixture(motion, lyrics))
     export_lyrics_fixtures(desktop, out.parent / "lyrics")
+    from marea.demo_cover import demo_cover
+    from marea.render.text import Fonts, ItemLayout, layout_credit
+    from marea.wordfx.palette import dominant_colors
+    import render_cases
+
+    write(out.parent / "render", "layout.json", render_cases.layout_fixture(lyrics, Fonts, ItemLayout, layout_credit))
+    write(out.parent / "render", "palette.json", render_cases.palette_fixture(demo_cover, dominant_colors))
+    write(out.parent / "presets", "cases.json", render_cases.presets_fixture(desktop))
     for scenario in goldens(Engine, Params, exact_lyrics):
         write(out, f"golden-{scenario['name']}.json", scenario)
 
