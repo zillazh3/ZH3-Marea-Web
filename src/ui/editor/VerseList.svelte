@@ -219,6 +219,8 @@
       {@const inside = idx >= editor.first && idx <= editor.last}
       {@const isFirst = idx === editor.first}
       {@const isLast = idx === editor.last}
+      {@const hovered =
+        editor.hoverRange !== null && idx >= editor.hoverRange[0] && idx <= editor.hoverRange[1]}
       <li>
         <button
           type="button"
@@ -228,6 +230,7 @@
           class:last={inside && isLast}
           class:mid={inside && !isFirst && !isLast}
           class:edge={inside && (isFirst || isLast)}
+          class:hover-preview={hovered && !inside}
           class:holding={holdRow === idx}
           class:drag-anchor={dragAnchor === idx}
           aria-pressed={inside}
@@ -397,6 +400,13 @@
 
   .vlist button.in {
     background: var(--pill);
+    color: var(--text);
+  }
+
+  .vlist button.hover-preview {
+    background: var(--hover);
+    outline: 1px dashed var(--accent-icon);
+    outline-offset: -1px;
     color: var(--text);
   }
 

@@ -16,11 +16,17 @@ describe('loadPreferences', () => {
   });
 
   it('reads valid values', () => {
-    const stored = JSON.stringify({ theme: 'light', railCollapsed: true, locale: 'en' });
+    const stored = JSON.stringify({
+      theme: 'light',
+      railCollapsed: true,
+      locale: 'en',
+      wordfxExperimental: true,
+    });
     expect(loadPreferences(storageWith(stored))).toEqual({
       theme: 'light',
       railCollapsed: true,
       locale: 'en',
+      wordfxExperimental: true,
     });
   });
 
@@ -45,13 +51,14 @@ describe('savePreferences', () => {
     const written = new Map<string, string>();
     const saved = savePreferences(
       { setItem: (key, value) => written.set(key, value) },
-      { theme: 'dark', railCollapsed: false, locale: 'auto' },
+      { theme: 'dark', railCollapsed: false, locale: 'auto', wordfxExperimental: false },
     );
     expect(saved).toBe(true);
     expect(JSON.parse(written.get(PREFERENCES_KEY) ?? '')).toEqual({
       theme: 'dark',
       railCollapsed: false,
       locale: 'auto',
+      wordfxExperimental: false,
     });
   });
 

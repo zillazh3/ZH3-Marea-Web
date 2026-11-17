@@ -38,11 +38,12 @@ test.describe('editor', () => {
     await openDemoInEditor(page);
 
     const tablist = page.getByRole('tablist', { name: 'Ajustes del clip' });
-    await expect(tablist.getByRole('tab')).toHaveCount(4);
+    await expect(tablist.getByRole('tab')).toHaveCount(5);
     await expect(tablist.getByRole('tab', { name: 'Estilo' })).toBeVisible();
     await expect(tablist.getByRole('tab', { name: 'Fondo' })).toBeVisible();
     await expect(tablist.getByRole('tab', { name: 'Audio' })).toBeVisible();
     await expect(tablist.getByRole('tab', { name: 'Marca de agua' })).toBeVisible();
+    await expect(tablist.getByRole('tab', { name: 'Anzuelo' })).toBeVisible();
     await expect(tablist.getByRole('tab', { name: /Cinemático/ })).toHaveCount(0);
 
     const shot = await page.locator('.preview canvas').screenshot();
@@ -125,7 +126,10 @@ test.describe('editor', () => {
     await offset.dispatchEvent('input');
     await expect(page.getByText('+250 ms')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Solo letra' }).click();
+    await page
+      .getByRole('tabpanel', { name: 'Audio' })
+      .getByRole('button', { name: 'Solo letra' })
+      .click();
     await expect(page.getByText(/Vista previa silenciosa/)).toBeVisible();
   });
 
@@ -160,5 +164,55 @@ test.describe('editor', () => {
       () => document.documentElement.scrollWidth > window.innerWidth,
     );
     expect(overflow).toBe(false);
+  });
+
+  test('enables experimental wordfx in Settings and shows intensity/debug controls in Style tab', async ({
+    page,
+  }) => {
+    await page.goto('/settings');
+    const toggle = page.getByRole('switch', { name: 'Efectos semánticos por palabra' });
+    await expect(toggle).toHaveAttribute('aria-checked', 'false');
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-checked', 'true');
+
+    await openDemoInEditor(page);
+    const fxSlider = page.getByRole('slider', { name: 'Intensidad FX' });
+    await expect(fxSlider).toBeVisible();
+    await expect(
+      page.getByRole('switch', { name: 'Adaptar color de efectos al fondo' }),
+    ).toBeVisible();
+
+    const debugSwitch = page.getByRole('switch', { name: 'Depurar efectos por palabra' });
+    await debugSwitch.click();
+    await expect(debugSwitch).toHaveAttribute('aria-checked', 'true');
+
+    const shot = await page.locator('.preview canvas').screenshot();
+    expect(shot.byteLength).toBeGreaterThan(2000);
+  });
+
+  test('suggests ranges in Anzuelo, highlights on hover, applies range, and queues variants', async ({
+    page,
+  }) => {
+    await openDemoInEditor(page);
+
+    await page.getByRole('tab', { name: 'Anzuelo' }).click();
+    await expect(page.getByText(/Elige una duración/)).toBeVisible();
+
+    await page.getByRole('button', { name: '15 s' }).click();
+    await page.getByRole('button', { name: 'Sugerir rangos' }).click();
+
+    const options = page.getByRole('listbox', { name: 'Anzuelo' }).getByRole('option');
+    await expect(options.first()).toBeVisible();
+    await options.nth(1).hover();
+    await expect(page.locator('.vlist button.hover-preview').first()).toBeVisible();
+    await options.first().click();
+    await expect(page.locator('.range-label')).toHaveText(/Versos 7–9/);
+
+    await page.getByRole('button', { name: 'Encolar variantes…' }).click();
+    await expect(
+      page.getByRole('region', { name: /Una exportación por cada Corriente/ }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Agregar a la cola' }).click();
+    await expect(page.getByText(/\d+ exportaciones añadidas a la cola\./)).toBeVisible();
   });
 });

@@ -1,6 +1,21 @@
+import { defaultParams } from '@/engine/params';
+import type { FxPlanData, Rgb } from '@/engine/wordfx/fxtypes';
+import { applyAudioFadeOut } from '@/export/audio';
+import {
+  clipFilename,
+  EXPORT_AUDIO_RATE,
+  EXPORT_PRESETS,
+  type ExportFormatId,
+  type ExportMarker,
+  type ExportMode,
+  type ExportOutroMs,
+} from '@/export/presets';
 import { AudioMasterClock } from '@/features/audio/clock';
-import { decodeAudioBytes, type DecodedAudio } from '@/features/audio/local';
+import { decodeAudioBytes, slicePaddedSegment, type DecodedAudio } from '@/features/audio/local';
+import { ExportError } from '@/features/exports/errors';
+import { suggestHooks, type HookSuggestion } from '@/features/hooks/analyze';
 import { demoLyrics } from '@/features/lyrics/demo';
+import type { PresetEntry } from '@/features/presets/builtins';
 import {
   applyPreset,
   capturePreset,
@@ -10,27 +25,43 @@ import {
   type LookState,
   type PresetSection,
 } from '@/features/presets/schema';
-import type { PresetEntry } from '@/features/presets/builtins';
 import {
+  clampVerseRange,
   clipRangeMs,
   restoreEditorState,
   serializeEditorState,
   type AudioSourceMode,
 } from '@/features/projects/editorLook';
 import type { ClipProject } from '@/features/projects/project';
-import { opfsAvailable, readFile, writeFile } from '@/features/storage/opfs';
 import { toneFor } from '@/features/storage/meta';
+import { opfsAvailable, readFile, writeFile } from '@/features/storage/opfs';
 import { presetStore } from '@/features/storage/presets';
 import { projectStore } from '@/features/storage/projects';
 import { PreviewClient } from '@/render/previewClient';
 import { defaultStyle } from '@/render/style';
-import { defaultParams } from '@/engine/params';
 import { describeError } from '../errors';
 import { i18n } from '../i18n.svelte';
+import { exportQueue } from '../state/exportQueue.svelte';
 import { library } from '../state/library.svelte';
 import { player } from '../state/player.svelte';
+import { preferences } from '../state/preferences.svelte';
 import { session } from '../state/session.svelte';
 import { notifications } from '../state/toasts.svelte';
+import { WordfxBridge } from './wordfxBridge';
+
+export const DEFAULT_EXPORT_OPTIONS: EditorExportOptions = {
+  mode: 'lyrics',
+  format: 'tiktok',
+  marker: 'none',
+  outroMs: 500,
+};
+
+export interface EditorExportOptions {
+  readonly mode: ExportMode;
+  readonly format: ExportFormatId;
+  readonly marker: ExportMarker;
+  readonly outroMs: ExportOutroMs;
+}
 
 export const PREVIEW_W = 540;
 export const PREVIEW_H = 960;
@@ -91,6 +122,9 @@ export class EditorController {
 
   presets = $state.raw<PresetEntry[]>([]);
   thumbUrls = $state.raw<Record<string, string>>({});
+  hoverRange = $state.raw<readonly [number, number] | null>(null);
+  fxDebug = $state(false);
+  exportOptions = $state.raw<EditorExportOptions>(DEFAULT_EXPORT_OPTIONS);
 
   private project: ClipProject | null = null;
   private projectId: string | null = null;
@@ -100,6 +134,8 @@ export class EditorController {
     writers?: readonly string[];
   } | null = null;
   private coverBytes: Uint8Array | null = null;
+  private coverPalette: Rgb[] = [];
+  private readonly wordfx = new WordfxBridge();
   private client: PreviewClient | null = null;
   private readonly audioClock = new AudioMasterClock();
   private audioRafId: number | null = null;
@@ -121,6 +157,9 @@ export class EditorController {
       writers: project.lyrics.writers,
     };
     this.coverBytes = decodeBase64Bytes(project.coverPngB64);
+    this.coverPalette = [];
+    this.wordfx.reset();
+    this.hoverRange = null;
     this.audio = null;
     this.audioMissing = false;
     this.audioLoading = false;
@@ -171,6 +210,7 @@ export class EditorController {
       this.audio = decoded;
       this.audioMissing = false;
       this.audioClock.setAudio(decoded);
+      if (preferences.value.wordfxExperimental) this.configureWorker();
     } catch {
       if (token === this.loadToken) this.audioMissing = true;
     } finally {
@@ -200,16 +240,34 @@ export class EditorController {
             player.setProgress(pos.offsetMs / Math.max(1, pos.durationMs));
           }
         },
+        onCoverPalette: (palette) => {
+          this.coverPalette = palette;
+          if (preferences.value.wordfxExperimental) this.configureWorker();
+        },
       });
     } catch (err) {
       this.previewError = err instanceof Error ? err.message : 'Preview unavailable';
     }
   }
 
+  private buildActiveFxPlan(look: LookState): FxPlanData | null {
+    if (!preferences.value.wordfxExperimental || !this.project) return null;
+    return this.wordfx.buildPlan({
+      lyrics: this.project.lyrics,
+      title: this.project.title,
+      artist: this.project.artist,
+      palette: this.coverPalette,
+      fx: look.fx,
+      audio: this.audio,
+      audioOffsetMs: this.project.audioOffsetMs,
+    });
+  }
+
   private configureWorker(): void {
     if (!this.client || !this.previewReady || !this.project || !this.lyricsSpec) return;
     const [rangeStartMs, rangeEndMs] = clipRangeMs(this.project, this.first, this.last);
     this.durationMs = Math.max(1, rangeEndMs - rangeStartMs);
+    const activeFx = preferences.value.wordfxExperimental;
     this.client.configure({
       lyrics: this.lyricsSpec,
       coverBytes: this.coverBytes,
@@ -219,6 +277,8 @@ export class EditorController {
       style: this.look.style,
       rangeStartMs,
       rangeEndMs,
+      fxPlan: activeFx ? this.buildActiveFxPlan(this.look) : null,
+      fxDebug: activeFx && this.fxDebug,
     });
   }
 
@@ -387,6 +447,47 @@ export class EditorController {
     this.markDirty();
   }
 
+  setHoverRange(range: readonly [number, number] | null): void {
+    this.hoverRange = range;
+  }
+
+  setFxDebug(on: boolean): void {
+    if (this.fxDebug === on) return;
+    this.fxDebug = on;
+    this.configureWorker();
+  }
+
+  refreshWordfx(enabled: boolean): void {
+    if (!enabled) this.fxDebug = false;
+    this.configureWorker();
+  }
+
+  setExportOptions(opts: EditorExportOptions): void {
+    this.exportOptions = opts;
+  }
+
+  suggestHooksFor(targetsS: readonly number[]): {
+    results: Record<number, readonly HookSuggestion[]>;
+    usedAudio: boolean;
+  } {
+    if (!this.project) return { results: {}, usedAudio: false };
+    const { analysis } = this.wordfx.getAudioFeatures(this.audio);
+    const fxCounts = preferences.value.wordfxExperimental
+      ? this.wordfx.fxCounts(this.project.lyrics)
+      : null;
+    const map = suggestHooks(this.project.lyrics, {
+      title: this.project.title,
+      targetsS,
+      analysis,
+      audioOffsetMs: this.project.audioOffsetMs,
+      fxCounts,
+      outroMs: this.exportOptions.outroMs,
+    });
+    const results: Record<number, readonly HookSuggestion[]> = {};
+    for (const [k, list] of map.entries()) results[k] = list;
+    return { results, usedAudio: analysis !== null };
+  }
+
   updateLook(patch: Partial<LookState>): void {
     this.look = { ...this.look, ...patch };
     this.configureWorker();
@@ -479,6 +580,7 @@ export class EditorController {
       this.audio = decoded;
       this.audioSource = 'local';
       this.audioClock.setAudio(decoded);
+      if (preferences.value.wordfxExperimental) this.configureWorker();
       this.markDirty();
     } catch (error) {
       notifications.show(describeError(i18n.m, error), 'error');
@@ -491,6 +593,7 @@ export class EditorController {
     if (!this.project) return;
     this.project.audioOffsetMs = offsetMs;
     this.audioClock.updateOffset(offsetMs);
+    if (preferences.value.wordfxExperimental) this.configureWorker();
     this.markDirty();
   }
 
@@ -512,6 +615,138 @@ export class EditorController {
   async refreshPresets(): Promise<void> {
     this.presets = await presetStore.list();
     this.scheduleMissingThumbs(100);
+  }
+
+  enqueueHook(
+    suggestion: HookSuggestion,
+    override?: { readonly look: LookState; readonly presetName: string },
+  ): boolean {
+    const mode = this.exportOptions.mode === 'lyrics' ? 'lyrics' : 'song';
+    return this.enqueueClipRange(
+      { ...this.exportOptions, mode },
+      suggestion.first,
+      suggestion.last,
+      suggestion.startMs,
+      suggestion.endMs,
+      override?.look ?? this.look,
+      override?.presetName ?? this.appliedPreset,
+    );
+  }
+
+  enqueueExport(options: EditorExportOptions): boolean {
+    if (!this.project) return false;
+    const isFull = options.mode === 'full';
+    let startMs: number;
+    let endMs: number;
+    if (isFull) {
+      startMs = 0;
+      endMs = this.audio
+        ? Math.max(
+            1000,
+            (this.audio.left.length / this.audio.sampleRate) * 1000 - this.project.audioOffsetMs,
+          )
+        : clipRangeMs(this.project, 0, Math.max(0, this.project.lyrics.lines.length - 1))[1];
+      return this.enqueueClipRange(
+        options,
+        null,
+        null,
+        startMs,
+        endMs,
+        this.look,
+        this.appliedPreset,
+      );
+    }
+    const lines = this.project.lyrics.lines;
+    const [lo, hi] = clampVerseRange(this.first, this.last, lines.length);
+    const slice = lines.slice(lo, hi + 1);
+    const head = slice[0];
+    if (head) {
+      const maxEnd = slice.reduce((acc, line) => Math.max(acc, line.end), head.end);
+      startMs = head.start;
+      endMs = Math.max(head.start + 1, maxEnd + options.outroMs);
+    } else {
+      startMs = 0;
+      endMs = options.outroMs;
+    }
+    return this.enqueueClipRange(options, lo, hi, startMs, endMs, this.look, this.appliedPreset);
+  }
+
+  private enqueueClipRange(
+    options: EditorExportOptions,
+    first: number | null,
+    last: number | null,
+    startMs: number,
+    endMs: number,
+    look: LookState,
+    presetLabel: string,
+  ): boolean {
+    if (!this.project || !this.lyricsSpec) return false;
+    const isFull = options.mode === 'full';
+    const needsAudio = options.mode !== 'lyrics';
+    if (needsAudio && !this.audio) {
+      notifications.show(describeError(i18n.m, new ExportError('noAudioLoaded')), 'error');
+      return false;
+    }
+
+    let audioSamples: { left: Float32Array; right: Float32Array } | null = null;
+    if (needsAudio && this.audio) {
+      audioSamples = slicePaddedSegment(
+        this.audio,
+        startMs,
+        endMs,
+        this.project.audioOffsetMs,
+        150,
+      );
+      if (!isFull) {
+        applyAudioFadeOut(
+          audioSamples.left,
+          audioSamples.right,
+          options.outroMs,
+          this.audio.sampleRate,
+        );
+      }
+    }
+
+    this.pausePlayback();
+    const spec = EXPORT_PRESETS[options.format];
+    const m = i18n.m.editor.exportBar;
+    const label = m.summary(
+      m.modes[options.mode],
+      first === null ? null : first + 1,
+      last === null ? null : last + 1,
+      m.resolutions[options.format],
+    );
+    const fileName = clipFilename(
+      this.project.artist,
+      this.project.title,
+      first,
+      last,
+      presetLabel,
+    );
+    const demoCoverLabel =
+      this.project.title === 'Marea de luz' && this.project.artist === 'Demo · letra original';
+    const fxPlan = this.buildActiveFxPlan(look);
+
+    exportQueue.enqueue({
+      title: this.project.title,
+      artist: this.project.artist,
+      label,
+      fileName,
+      lyrics: this.lyricsSpec,
+      coverBytes: this.coverBytes,
+      demoCoverLabel,
+      params: look.params,
+      style: look.style,
+      startMs,
+      endMs,
+      width: spec.width,
+      height: spec.height,
+      marker: options.marker,
+      audioSamples,
+      audioSampleRate: this.audio ? this.audio.sampleRate : EXPORT_AUDIO_RATE,
+      fxPlan,
+    });
+    return true;
   }
 
   private cancelScheduledThumbs(): void {

@@ -2,6 +2,7 @@
   import { MOTION_MODES, type MotionMode } from '@/engine/motion';
   import Switch from '../components/Switch.svelte';
   import { i18n } from '../i18n.svelte';
+  import { preferences } from '../state/preferences.svelte';
   import PresetsPanel from './PresetsPanel.svelte';
   import type { EditorController } from './editorState.svelte';
 
@@ -13,6 +14,7 @@
   const m = $derived(i18n.m.editor.style);
   const style = $derived(editor.look.style);
   const params = $derived(editor.look.params);
+  const fx = $derived(editor.look.fx);
 
   function setStyle(patch: Partial<typeof style>): void {
     editor.updateLook({ style: { ...style, ...patch } });
@@ -20,6 +22,10 @@
 
   function setParams(patch: Partial<typeof params>): void {
     editor.updateLook({ params: { ...params, ...patch } });
+  }
+
+  function setFx(patch: Partial<typeof fx>): void {
+    editor.updateLook({ fx: { ...fx, ...patch } });
   }
 </script>
 
@@ -160,6 +166,47 @@
     <span>{m.font}</span>
     <span class="font-val">{m.fontValue}</span>
   </div>
+
+  {#if preferences.value.wordfxExperimental}
+    <div class="fx-section">
+      <label class="slider-row">
+        <span>{m.fxIntensity}</span>
+        <input
+          type="range"
+          min="0"
+          max="150"
+          aria-label={m.fxIntensity}
+          value={Math.round(fx.fxIntensity * 100)}
+          oninput={(e) => {
+            setFx({ fxIntensity: Number(e.currentTarget.value) / 100 });
+          }}
+        />
+        <output>{Math.round(fx.fxIntensity * 100)}%</output>
+      </label>
+
+      <div class="toggle-row">
+        <span>{m.fxAdaptBg}</span>
+        <Switch
+          checked={fx.adaptBg}
+          label={m.fxAdaptBg}
+          onchange={(v: boolean) => {
+            setFx({ adaptBg: v });
+          }}
+        />
+      </div>
+
+      <div class="toggle-row">
+        <span>{m.fxDebug}</span>
+        <Switch
+          checked={editor.fxDebug}
+          label={m.fxDebug}
+          onchange={(v: boolean) => {
+            editor.setFxDebug(v);
+          }}
+        />
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -227,5 +274,13 @@
   .font-val {
     font-size: var(--fs-sm);
     color: var(--faint);
+  }
+
+  .fx-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--border);
   }
 </style>

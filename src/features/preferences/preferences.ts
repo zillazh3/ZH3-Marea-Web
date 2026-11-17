@@ -8,12 +8,14 @@ export interface Preferences {
   /** null = follow the window width (auto-collapse); true/false = the user's explicit choice. */
   railCollapsed: boolean | null;
   locale: LocalePreference;
+  wordfxExperimental: boolean;
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
   theme: 'system',
   railCollapsed: null,
   locale: 'auto',
+  wordfxExperimental: false,
 };
 
 export const PREFERENCES_KEY = 'zh3marea.preferences';
@@ -32,12 +34,16 @@ export function loadPreferences(storage: Pick<Storage, 'getItem'>): Preferences 
   }
   if (typeof raw !== 'object' || raw === null) return DEFAULT_PREFERENCES;
   const record = raw as Record<string, unknown>;
-  const { theme, railCollapsed, locale } = record;
+  const { theme, railCollapsed, locale, wordfxExperimental } = record;
   return {
     theme: isOneOf(THEME_PREFERENCES, theme) ? theme : DEFAULT_PREFERENCES.theme,
     railCollapsed:
       typeof railCollapsed === 'boolean' ? railCollapsed : DEFAULT_PREFERENCES.railCollapsed,
     locale: isOneOf(['auto', ...LOCALES], locale) ? locale : DEFAULT_PREFERENCES.locale,
+    wordfxExperimental:
+      typeof wordfxExperimental === 'boolean'
+        ? wordfxExperimental
+        : DEFAULT_PREFERENCES.wordfxExperimental,
   };
 }
 
