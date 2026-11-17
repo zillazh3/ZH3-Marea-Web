@@ -6,7 +6,7 @@ import type { ProjectMeta } from './meta';
 
 // One IndexedDB database for everything small and structured. Large binaries (audio, exported video) go to OPFS, see opfs.ts.
 
-const DB_NAME = 'zh3marea';
+export const DB_NAME = 'zh3marea';
 const DB_VERSION = 3;
 
 export interface ExportClipRecord {
@@ -69,6 +69,21 @@ export function appDb(): Promise<AppDb> {
         exportsStore.createIndex('by-created', 'createdAt');
       }
     },
+    // Another tab is deleting or upgrading the database: let go so it is not blocked.
+    blocking() {
+      void closeAppDb();
+    },
   });
   return opened;
+}
+
+/** Closes the shared connection so the database can be deleted; the next `appDb()` call reopens it. */
+export async function closeAppDb(): Promise<void> {
+  const pending = opened;
+  opened = undefined;
+  try {
+    (await pending)?.close();
+  } catch {
+    // The connection never opened (IndexedDB blocked), so there is nothing to close.
+  }
 }

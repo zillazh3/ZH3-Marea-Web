@@ -5,7 +5,7 @@
   import type { IconName } from '../icons/icons';
 
   interface Props extends HTMLButtonAttributes {
-    variant?: 'primary' | 'default';
+    variant?: 'primary' | 'default' | 'danger';
     icon?: IconName;
     children: Snippet;
   }
@@ -45,6 +45,12 @@
 
   button.primary:hover {
     background: var(--grad-hover);
+  }
+
+  button.danger {
+    border-color: var(--danger);
+    color: var(--danger);
+    font-weight: 600;
   }
 
   button:disabled {

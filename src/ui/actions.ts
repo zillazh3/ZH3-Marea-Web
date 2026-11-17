@@ -186,6 +186,13 @@ export function downloadSaved(id: string): Promise<void> {
   });
 }
 
+/** One `.marea.json` download per saved project, for backing up before a wipe. */
+export function downloadAllSaved(): Promise<void> {
+  return attempt(async () => {
+    for (const item of library.items) await downloadSaved(item.id);
+  });
+}
+
 export function deleteSaved(id: string, title: string): Promise<void> {
   return attempt(async () => {
     await library.remove(id);

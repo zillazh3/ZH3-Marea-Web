@@ -49,6 +49,14 @@ export async function removeFile(path: readonly string[], name: string): Promise
   }
 }
 
+/** Removes every file this site keeps in the origin private file system (audio and exported videos). */
+export async function clearAll(): Promise<void> {
+  const root = await navigator.storage.getDirectory();
+  const names: string[] = [];
+  for await (const name of root.keys()) names.push(name);
+  for (const name of names) await root.removeEntry(name, { recursive: true });
+}
+
 /**
  * Asks the browser not to evict this site's data under storage pressure. Called when the first project is saved, so the request
  * comes with a reason. Returns whether the data is now persistent.

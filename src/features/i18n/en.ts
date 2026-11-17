@@ -370,6 +370,28 @@ export const en: Messages = {
     privacy: 'Privacy',
     privacyHint: 'What is stored in your browser and which external services the app uses.',
     privacyHref: '/en/privacy/',
+    dataTitle: 'Your data',
+    dataIntro:
+      'Your projects, audio and settings live only in this browser. None of it is uploaded to a server.',
+    wipeButton: 'Borrar todos mis datos',
+    wipeTitle: 'Delete all your data?',
+    wipeIntro: 'This deletes the following from this browser and cannot be undone:',
+    wipeItems: [
+      'Your projects and the audio files you loaded.',
+      'Your Currents presets.',
+      'Your export history and any videos still stored here.',
+      'Your settings: theme, language and export preferences.',
+      'Your Spicy Lyrics key and the Spotify connection, including your Client ID.',
+      'Saved lyrics and the offline copy of the app.',
+    ],
+    wipeBackupHint:
+      'You can download your projects before deleting. The file does not include audio.',
+    wipeBackup: (count) => `Download my projects (${String(count)})`,
+    wipeConfirm: 'Delete everything',
+    wipeCancel: 'Cancel',
+    wipeWorking: 'Deleting…',
+    wipeFailed:
+      "I couldn't delete everything. Try again, or clear this site's data from your browser settings.",
   },
   toast: {
     opened: (title) => `Opened "${title}" in the Editor`,

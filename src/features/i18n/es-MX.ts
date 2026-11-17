@@ -375,6 +375,28 @@ export const esMX = {
     privacy: 'Privacidad',
     privacyHint: 'Qué se guarda en tu navegador y qué servicios externos usa la app.',
     privacyHref: '/privacidad/',
+    dataTitle: 'Tus datos',
+    dataIntro:
+      'Tus proyectos, audios y ajustes viven solo en este navegador. Nada de esto se sube a un servidor.',
+    wipeButton: 'Borrar todos mis datos',
+    wipeTitle: '¿Borrar todos tus datos?',
+    wipeIntro: 'Se borra de este navegador y no se puede deshacer:',
+    wipeItems: [
+      'Tus proyectos y los audios que cargaste.',
+      'Tus presets de Corrientes.',
+      'El historial de exportaciones y los videos que sigan guardados aquí.',
+      'Tus ajustes: tema, idioma y preferencias de exportación.',
+      'Tu llave de Spicy Lyrics y la conexión con Spotify, con tu Client ID.',
+      'Las letras guardadas y la copia para usar la app sin conexión.',
+    ],
+    wipeBackupHint:
+      'Antes de borrar puedes descargar tus proyectos. El archivo no incluye el audio.',
+    wipeBackup: (count: number) => `Descargar mis proyectos (${String(count)})`,
+    wipeConfirm: 'Borrar todo',
+    wipeCancel: 'Cancelar',
+    wipeWorking: 'Borrando…',
+    wipeFailed:
+      'No pude borrar todo. Inténtalo de nuevo o borra los datos del sitio desde la configuración de tu navegador.',
   },
   toast: {
     opened: (title: string) => `Abrí «${title}» en el Editor`,

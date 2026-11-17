@@ -14,6 +14,7 @@
   import { spicyKey } from '../state/spicyKey.svelte';
   import { spotifyRedirectUri, spotifyStatus } from '../state/spotify.svelte';
   import { notifications } from '../state/toasts.svelte';
+  import WipeDataCard from './WipeDataCard.svelte';
 
   const m = $derived(i18n.m);
   const themeLabels = $derived<Record<ThemePreference, string>>({
@@ -228,6 +229,8 @@
     </div>
     <p class="hint">{m.settings.wordfxHint}</p>
   </section>
+
+  <WipeDataCard />
 
   <section class="card">
     <h2>{m.settings.aboutTitle}</h2>
