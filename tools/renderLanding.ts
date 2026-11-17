@@ -75,6 +75,55 @@ function renderCorrienteCard(item: LandingCorriente, m: LandingMessages): string
       </li>`;
 }
 
+export function renderRobotsTxt(site?: SiteConfig): string {
+  const resolved =
+    site ??
+    resolveSiteConfig({
+      VITE_SOURCE_URL: process.env.VITE_SOURCE_URL,
+      VITE_SITE_URL: process.env.VITE_SITE_URL,
+      VITE_WINDOWS_RELEASE_URL: process.env.VITE_WINDOWS_RELEASE_URL,
+    });
+  return `User-agent: *\nAllow: /\n\nSitemap: ${resolved.siteUrl}/sitemap.xml\n`;
+}
+
+export function renderSitemapXml(site?: SiteConfig): string {
+  const resolved =
+    site ??
+    resolveSiteConfig({
+      VITE_SOURCE_URL: process.env.VITE_SOURCE_URL,
+      VITE_SITE_URL: process.env.VITE_SITE_URL,
+      VITE_WINDOWS_RELEASE_URL: process.env.VITE_WINDOWS_RELEASE_URL,
+    });
+  const urls = [
+    {
+      loc: `${resolved.siteUrl}/`,
+      altEs: `${resolved.siteUrl}/`,
+      altEn: `${resolved.siteUrl}/en/`,
+    },
+    {
+      loc: `${resolved.siteUrl}/en/`,
+      altEs: `${resolved.siteUrl}/`,
+      altEn: `${resolved.siteUrl}/en/`,
+    },
+  ];
+  const entries = urls
+    .map(
+      (entry) => `  <url>
+    <loc>${escapeHtml(entry.loc)}</loc>
+    <xhtml:link rel="alternate" hreflang="es-MX" href="${escapeHtml(entry.altEs)}" />
+    <xhtml:link rel="alternate" hreflang="en" href="${escapeHtml(entry.altEn)}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeHtml(entry.altEs)}" />
+  </url>`,
+    )
+    .join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${entries}
+</urlset>
+`;
+}
+
 export function renderLandingHtml(
   locale: LandingLocale,
   options?: {

@@ -40,7 +40,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['*.js'],
+    files: ['*.js', 'tools/**/*.mjs'],
     extends: [tseslint.configs.disableTypeChecked],
     languageOptions: { globals: globals.node },
   },

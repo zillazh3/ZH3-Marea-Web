@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { renderLandingHtml } from './renderLanding';
+import { renderLandingHtml, renderRobotsTxt, renderSitemapXml } from './renderLanding';
 
 export function zh3mareaLandingPlugin(): Plugin {
   return {
@@ -12,6 +12,16 @@ export function zh3mareaLandingPlugin(): Plugin {
           res.statusCode = 302;
           res.setHeader('Location', `/en/${search ? `?${search}` : ''}`);
           res.end();
+          return;
+        }
+        if (pathname === '/robots.txt') {
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          res.end(renderRobotsTxt());
+          return;
+        }
+        if (pathname === '/sitemap.xml') {
+          res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+          res.end(renderSitemapXml());
           return;
         }
         next();
@@ -31,16 +41,19 @@ export function zh3mareaLandingPlugin(): Plugin {
       const fontAsset = Object.keys(bundle).find((name) =>
         /assets\/InterTight-Latin.*\.woff2$/i.test(name),
       );
-      if (!fontAsset) return;
-      for (const name of ['index.html', 'en/index.html']) {
-        const entry = bundle[name];
-        if (entry?.type === 'asset' && typeof entry.source === 'string') {
-          entry.source = entry.source.replace(
-            '/src/landing/fonts/InterTight-Latin.woff2',
-            `/${fontAsset}`,
-          );
+      if (fontAsset) {
+        for (const name of ['index.html', 'en/index.html']) {
+          const entry = bundle[name];
+          if (entry?.type === 'asset' && typeof entry.source === 'string') {
+            entry.source = entry.source.replace(
+              '/src/landing/fonts/InterTight-Latin.woff2',
+              `/${fontAsset}`,
+            );
+          }
         }
       }
+      this.emitFile({ type: 'asset', fileName: 'robots.txt', source: renderRobotsTxt() });
+      this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: renderSitemapXml() });
     },
   };
 }
