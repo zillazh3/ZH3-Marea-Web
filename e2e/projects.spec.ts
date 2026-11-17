@@ -117,6 +117,7 @@ test.describe('library', () => {
   test('deletes a project after a second press', async ({ page }) => {
     await page.goto('/app/');
     await page.getByRole('button', { name: 'Probar con la canción demo' }).click();
+    await expect(page).toHaveURL(/\/app\/#editor$/);
     await page.goto('/app/#library');
 
     await page.getByRole('button', { name: 'Eliminar' }).click();
