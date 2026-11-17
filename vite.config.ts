@@ -1,11 +1,39 @@
 import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { zh3mareaPwaPlugin } from './tools/pwaPlugin';
 
+function trailingSlashRedirectPlugin(): Plugin {
+  return {
+    name: 'zh3marea-trailing-slash',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const rawUrl = req.url ?? '';
+        const [pathname, search] = rawUrl.split('?');
+        if (pathname === '/app') {
+          res.statusCode = 302;
+          res.setHeader('Location', `/app/${search ? `?${search}` : ''}`);
+          res.end();
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [svelte(), zh3mareaPwaPlugin()],
+  base: '/',
+  plugins: [svelte(), zh3mareaPwaPlugin(), trailingSlashRedirectPlugin()],
   worker: { format: 'es' },
+  build: {
+    rolldownOptions: {
+      input: {
+        app: fileURLToPath(new URL('./app/index.html', import.meta.url)),
+      },
+    },
+  },
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },

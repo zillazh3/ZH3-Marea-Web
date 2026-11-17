@@ -18,12 +18,15 @@
     library: Library,
     exports: Exports,
     settings: Settings,
-    callback: Callback,
   };
 
   const Screen = $derived(SCREENS[router.current]);
 </script>
 
 <Shell>
-  <Screen />
+  {#if router.callbackActive}
+    <Callback />
+  {:else}
+    <Screen />
+  {/if}
 </Shell>

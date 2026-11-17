@@ -21,11 +21,11 @@
 
   const { children }: Props = $props();
 
-  const section = $derived(i18n.m.nav[router.current === 'callback' ? 'spotify' : router.current]);
+  const section = $derived(i18n.m.nav[router.callbackActive ? 'spotify' : router.current]);
   const sourceUrl = configuredSourceUrl();
 
   let main: HTMLElement | undefined = $state();
-  let shownRoute = router.current;
+  let shownView = router.callbackActive ? 'callback' : router.current;
 
   $effect(() => {
     document.title = i18n.m.app.documentTitle(section);
@@ -35,9 +35,9 @@
 
   // Move focus to the new screen so keyboard and screen-reader users land on it; the initial load keeps focus untouched.
   $effect(() => {
-    const route = router.current;
-    if (route === shownRoute) return;
-    shownRoute = route;
+    const view = router.callbackActive ? 'callback' : router.current;
+    if (view === shownView) return;
+    shownView = view;
     main?.focus();
   });
 

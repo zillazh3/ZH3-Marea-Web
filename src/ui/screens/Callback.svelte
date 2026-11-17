@@ -14,15 +14,17 @@
 
   onMount(() => {
     void (async () => {
+      const search = window.location.search;
       try {
-        const target = await spotifyStatus.completeCallback(window.location.search);
+        const target = await spotifyStatus.completeCallback(search);
         notifications.show(m.settings.spotifyConnectedToast, 'ok');
         const nextRoute: RouteId = (ROUTES as readonly string[]).includes(target)
           ? (target as RouteId)
           : 'settings';
-        router.navigate(nextRoute);
+        router.finishCallback(nextRoute);
       } catch (error) {
         errorMessage = describeError(i18n.m, error);
+        router.clearCallbackUrl();
       }
     })();
   });

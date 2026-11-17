@@ -31,7 +31,7 @@
   }
 
   const placementKey = $derived(
-    `${router.current}:${String(layout.railCollapsed)}:${String(layout.isDock)}`,
+    `${String(router.callbackActive)}:${router.current}:${String(layout.railCollapsed)}:${String(layout.isDock)}`,
   );
 
   // Re-measure whenever the active item or the rail geometry changes.

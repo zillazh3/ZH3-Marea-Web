@@ -2,7 +2,7 @@
   import type { Snippet } from 'svelte';
   import type { HTMLAnchorAttributes } from 'svelte/elements';
   import { router } from './router.svelte';
-  import { pathFor, type RouteId } from './routes';
+  import { hashFor, type RouteId } from './routes';
 
   interface Props extends Omit<HTMLAnchorAttributes, 'href' | 'children'> {
     route: RouteId;
@@ -23,8 +23,8 @@
 
 <a
   {...rest}
-  href={pathFor(route)}
-  aria-current={router.current === route ? 'page' : undefined}
+  href={hashFor(route)}
+  aria-current={!router.callbackActive && router.current === route ? 'page' : undefined}
   {onclick}
 >
   {@render children()}

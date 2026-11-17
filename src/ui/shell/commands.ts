@@ -30,7 +30,7 @@ const ROUTE_ICONS = {
   library: 'library',
   exports: 'download',
   settings: 'settings',
-} as const satisfies Record<Exclude<RouteId, 'callback'>, IconName>;
+} as const satisfies Record<RouteId, IconName>;
 
 const ROUTE_KEYWORDS = {
   home: 'home inicio',
@@ -39,14 +39,10 @@ const ROUTE_KEYWORDS = {
   library: 'library biblioteca proyectos',
   exports: 'exports exportar exportaciones descargas video',
   settings: 'settings ajustes preferencias',
-} as const satisfies Record<Exclude<RouteId, 'callback'>, string>;
-
-function isNavigable(route: RouteId): route is Exclude<RouteId, 'callback'> {
-  return route !== 'callback';
-}
+} as const satisfies Record<RouteId, string>;
 
 export function buildCommands(m: Messages, actions: CommandActions): Command[] {
-  const screens = ROUTES.filter(isNavigable).map((route): Command => ({
+  const screens = ROUTES.map((route): Command => ({
     id: `go-${route}`,
     group: 'goTo',
     label: m.nav[route],
