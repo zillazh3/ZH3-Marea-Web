@@ -255,11 +255,6 @@
     border-color: var(--accent);
   }
 
-  .format-select option {
-    background: var(--pop-bg);
-    color: var(--text);
-  }
-
   .summary {
     flex: 1;
     min-width: 160px;

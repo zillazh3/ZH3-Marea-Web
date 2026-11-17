@@ -35,6 +35,12 @@ select {
   color: inherit;
 }
 
+/* The select box is translucent, but the popup list is opaque: without this it falls back to the system white. */
+select option {
+  background: var(--pop-bg);
+  color: var(--text);
+}
+
 button {
   background: none;
   border: 0;
