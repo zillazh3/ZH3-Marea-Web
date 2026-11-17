@@ -18,6 +18,7 @@
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "test:e2e": "playwright test",
+    "test:e2e:static": "npm run build && playwright test -c playwright.static.config.ts",
     "preview:static": "npm run build && wrangler dev --ip 127.0.0.1 --port 8787",
     "deploy": "npm run check && npm run build && wrangler deploy"
   },
