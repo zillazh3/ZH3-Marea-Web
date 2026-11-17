@@ -18,7 +18,8 @@ it they use the placeholder `https://zh3marea.workers.dev` and the build prints 
 
 - In Workers Builds: a build variable with the same name (see below).
 
-Optional, same way: `VITE_SOURCE_URL` (the "Código fuente" link, default the GitHub repo) and `VITE_WINDOWS_RELEASE_URL`.
+Optional, same way: `VITE_SOURCE_URL` (the "Código fuente" link; default `https://github.com/zillazh3/ZH3-Marea-Web`) and
+`VITE_WINDOWS_RELEASE_URL` (the Windows download; default the latest release of the desktop repo, `zillazh3/ZH3-Marea`).
 
 ## 1. First deploy from your PC
 
@@ -52,7 +53,7 @@ Dashboard → Workers & Pages → `zh3marea` → Settings → Builds → Connect
 
 | Setting                  | Value                                                                    |
 | ------------------------ | ------------------------------------------------------------------------ |
-| Git repository           | this repository                                                          |
+| Git repository           | `zillazh3/ZH3-Marea-Web`                                                 |
 | Production branch        | `main`                                                                   |
 | Build command            | `npm run build`                                                          |
 | Deploy command           | `npx wrangler deploy`                                                    |

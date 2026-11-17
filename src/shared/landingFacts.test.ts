@@ -38,9 +38,12 @@ describe('landing single source of truth', () => {
       VITE_SITE_URL: 'https://marea.example.com/',
     });
     expect(overridden.repoUrl).toBe('https://github.com/example/zh3marea');
-    expect(overridden.windowsReleaseUrl).toBe(
-      'https://github.com/example/zh3marea/releases/latest',
-    );
+    expect(overridden.windowsReleaseUrl).toBe(DEFAULT_WINDOWS_RELEASE_URL);
     expect(overridden.siteUrl).toBe('https://marea.example.com');
+
+    const release = resolveSiteConfig({
+      VITE_WINDOWS_RELEASE_URL: 'https://example.com/download/',
+    });
+    expect(release.windowsReleaseUrl).toBe('https://example.com/download');
   });
 });

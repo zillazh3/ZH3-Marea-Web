@@ -67,7 +67,7 @@ describe('landing build-time rendering and single source of truth', () => {
       const html = renderPrivacyHtml(locale);
       expect(html).not.toMatch(/<script/i);
       expect(html).not.toContain('style="');
-      expect(html).toContain('href="https://github.com/zillazh3/ZH3-Marea/issues"');
+      expect(html).toContain('href="https://github.com/zillazh3/ZH3-Marea-Web/issues"');
       expect(html).toContain('AGPL-3.0');
       expect(html).toContain('<time datetime="2026-11-16">');
       expect(html).toContain(`href="${other}"`);

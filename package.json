@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zillazh3/ZH3-Marea-Web.git"
+  },
+  "homepage": "https://github.com/zillazh3/ZH3-Marea-Web#readme",
+  "bugs": {
+    "url": "https://github.com/zillazh3/ZH3-Marea-Web/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=22.12.0"

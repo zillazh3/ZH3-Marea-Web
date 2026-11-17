@@ -7,8 +7,9 @@ export interface SiteConfig {
   readonly authorName: string;
 }
 
-export const DEFAULT_REPO_URL = 'https://github.com/zillazh3/ZH3-Marea';
-export const DEFAULT_WINDOWS_RELEASE_URL = `${DEFAULT_REPO_URL}/releases/latest`;
+export const DEFAULT_REPO_URL = 'https://github.com/zillazh3/ZH3-Marea-Web';
+/** The Windows build lives in the desktop repository, not in this one. */
+export const DEFAULT_WINDOWS_RELEASE_URL = 'https://github.com/zillazh3/ZH3-Marea/releases/latest';
 export const DEFAULT_SITE_URL = 'https://zh3marea.workers.dev';
 export const APP_PATH = '/app/';
 
@@ -31,7 +32,7 @@ export function resolveSiteConfig(env?: {
 }): SiteConfig {
   const repoUrl = sanitizeHttpUrl(env?.VITE_SOURCE_URL) ?? DEFAULT_REPO_URL;
   const windowsReleaseUrl =
-    sanitizeHttpUrl(env?.VITE_WINDOWS_RELEASE_URL) ?? `${repoUrl}/releases/latest`;
+    sanitizeHttpUrl(env?.VITE_WINDOWS_RELEASE_URL) ?? DEFAULT_WINDOWS_RELEASE_URL;
   const siteUrl = sanitizeHttpUrl(env?.VITE_SITE_URL) ?? DEFAULT_SITE_URL;
   return {
     repoUrl,
