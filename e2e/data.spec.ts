@@ -65,4 +65,41 @@ test.describe('data hygiene', () => {
     await page.goto('/app/#library');
     await expect(page.getByRole('button', { name: 'Abrir Marea de luz' })).toHaveCount(0);
   });
+
+  test('reminds about projects that were never downloaded, at most once a week', async ({
+    page,
+  }) => {
+    const reminder = page.getByText('Tienes 1 proyecto que nunca descargaste.', { exact: false });
+    await page.goto('/app/');
+    await page.getByRole('button', { name: 'Probar con la canción demo' }).click();
+    await expect(page).toHaveURL(/\/app\/#editor$/);
+
+    await page.goto('/app/#library');
+    await expect(reminder).toBeVisible();
+    await page.getByRole('button', { name: 'Entendido' }).click();
+    await expect(reminder).toBeHidden();
+
+    // Shown once: a reload within the week stays quiet.
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Abrir Marea de luz' })).toBeVisible();
+    await expect(reminder).toBeHidden();
+
+    // A week later the reminder returns, until the project has been downloaded.
+    const longAgo = (): Promise<void> =>
+      page.evaluate(() => {
+        const state = JSON.parse(localStorage.getItem('zh3marea.backup') ?? '{}') as object;
+        localStorage.setItem('zh3marea.backup', JSON.stringify({ ...state, shownAt: 1 }));
+      });
+    await longAgo();
+    await page.reload();
+    await expect(reminder).toBeVisible();
+
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Descargar .marea.json' }).click();
+    await download;
+    await longAgo();
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Abrir Marea de luz' })).toBeVisible();
+    await expect(reminder).toBeHidden();
+  });
 });

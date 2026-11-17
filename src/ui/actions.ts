@@ -10,6 +10,7 @@ import { requestPersistence } from '@/features/storage/opfs';
 import { projectStore } from '@/features/storage/projects';
 import { describeError } from './errors';
 import { downloadText, pickFile, readText } from './files';
+import { backup } from './state/backup.svelte';
 import { i18n } from './i18n.svelte';
 import { router } from './router/router.svelte';
 import { lyricsChain } from './services';
@@ -183,6 +184,7 @@ export function downloadSaved(id: string): Promise<void> {
     if (!project) return;
     const name = (project.title || i18n.m.editor.untitled).replace(FILE_NAME_FORBIDDEN, '_');
     downloadText(`${name}.marea.json`, serializeProject(project), 'application/json');
+    backup.markExported(id);
   });
 }
 

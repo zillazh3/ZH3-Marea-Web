@@ -9,6 +9,7 @@
   import { toneFor } from '@/features/storage/meta';
   import Cover from '../shell/Cover.svelte';
   import { exportQueue } from '../state/exportQueue.svelte';
+  import { backup } from '../state/backup.svelte';
   import { library } from '../state/library.svelte';
 
   type Filter = 'all' | 'projects' | 'clips';
@@ -17,6 +18,15 @@
   let filter = $state<Filter>('all');
   /** Id of the project whose delete button was pressed once; a second press confirms. */
   let confirming = $state<string | null>(null);
+
+  /** How many projects the backup reminder is about; decided once per visit, once the library has loaded. */
+  let reminderCount = $state(0);
+  let reminderDecided = false;
+  $effect(() => {
+    if (!library.loaded || reminderDecided) return;
+    reminderDecided = true;
+    reminderCount = backup.claimReminder(library.items.map((item) => item.id));
+  });
 
   const options = $derived<{ value: Filter; label: string }[]>([
     { value: 'all', label: m.library.all },
@@ -54,6 +64,19 @@
     <Empty title={m.library.emptyTitle} hint={m.library.emptyHint} />
   {/if}
 {:else}
+  {#if reminderCount > 0}
+    <aside class="reminder">
+      <p>{m.library.backupReminder(reminderCount)}</p>
+      <button
+        class="dismiss"
+        onclick={() => {
+          reminderCount = 0;
+        }}
+      >
+        {m.library.backupDismiss}
+      </button>
+    </aside>
+  {/if}
   <div class="lib">
     {#each projects as item (item.id)}
       <div class="entry">
@@ -161,6 +184,34 @@
 {/if}
 
 <style>
+  .reminder {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--r-ctl);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: var(--fs-sm);
+  }
+
+  .dismiss {
+    flex: none;
+    height: 32px;
+    padding: 0 var(--space-3);
+    border-radius: var(--r-ctl);
+    color: var(--text);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+  }
+
+  .dismiss:hover {
+    background: var(--hover);
+  }
+
   .lib {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

@@ -106,6 +106,9 @@ export const esMX = {
     delete: 'Eliminar',
     confirmDelete: '¿Eliminar?',
     deleted: (title: string) => `Eliminé «${title}»`,
+    backupReminder: (count: number) =>
+      `${count === 1 ? 'Tienes 1 proyecto' : `Tienes ${String(count)} proyectos`} que nunca descargaste. Viven solo en este navegador: guarda un respaldo con «Descargar .marea.json». El archivo no incluye el audio.`,
+    backupDismiss: 'Entendido',
   },
   editor: {
     emptyTitle: 'Todavía no hay una canción abierta',

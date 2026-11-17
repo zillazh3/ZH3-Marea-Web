@@ -106,6 +106,9 @@ export const en: Messages = {
     delete: 'Delete',
     confirmDelete: 'Delete?',
     deleted: (title) => `Deleted "${title}"`,
+    backupReminder: (count) =>
+      `${count === 1 ? 'You have 1 project' : `You have ${String(count)} projects`} you never downloaded. They live only in this browser: save a backup with “Download .marea.json”. The file does not include the audio.`,
+    backupDismiss: 'Got it',
   },
   editor: {
     emptyTitle: 'No song is open yet',
