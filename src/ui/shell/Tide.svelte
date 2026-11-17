@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { router } from '../router/router.svelte';
   import { layout } from '../state/layout.svelte';
 
@@ -36,7 +37,9 @@
 
   // Re-measure whenever the active item or the rail geometry changes.
   $effect(() => {
-    if (placementKey) place();
+    // `place` writes `box`: untracked, so the effect does not re-run on its own write (it looped on the Spotify callback screen,
+    // which has no current item). `rail` is read here because the first run happens before it is bound.
+    if (placementKey && rail) untrack(place);
     if (!animated) requestAnimationFrame(() => (animated = true));
   });
 

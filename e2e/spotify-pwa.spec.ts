@@ -104,6 +104,10 @@ test.describe('Spotify PKCE, search, now-playing and PWA shell', () => {
       });
     });
 
+    // Returning from Spotify has no current nav item; the nav indicator once looped forever on that screen.
+    const pageErrors: string[] = [];
+    page.on('pageerror', (error) => pageErrors.push(error.message));
+
     // Save Client ID in Settings and check live Redirect URI
     await page.goto('/app/#settings');
     await expect(page.locator('#spotify-redirect-uri')).toHaveValue('http://127.0.0.1:5173/app/');
@@ -125,6 +129,7 @@ test.describe('Spotify PKCE, search, now-playing and PWA shell', () => {
     await page.goto('/app/?code=auth-ok&state=state-xyz');
     await expect(page).toHaveURL(/\/app\/#settings$/);
     await expect(page.getByText('Conectado a Spotify').first()).toBeVisible();
+    expect(pageErrors).toEqual([]);
 
     // Home now displays Sonando en Spotify card
     await page.goto('/app/#home');
