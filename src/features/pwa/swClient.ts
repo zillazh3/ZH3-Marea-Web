@@ -24,7 +24,7 @@ export interface SwContainerLike {
 export async function registerServiceWorker(
   container: SwContainerLike,
   hooks: SwHooks,
-  swUrl = '/sw.js',
+  swUrl = '/app/sw.js',
 ): Promise<SwRegistrationLike | null> {
   let reloading = false;
   let updateAccepted = false;
@@ -36,7 +36,7 @@ export async function registerServiceWorker(
     else if (typeof location !== 'undefined') location.reload();
   });
 
-  const reg = await container.register(swUrl, { updateViaCache: 'none' });
+  const reg = await container.register(swUrl, { scope: '/app/', updateViaCache: 'none' });
   let notified = false;
   const notify = (worker: SwWorkerLike | null): void => {
     if (!worker || notified) return;

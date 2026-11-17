@@ -3,21 +3,31 @@ import type { Plugin } from 'vite';
 
 const PRECACHE_EXT_RE = /\.(?:html|js|css|ttf|woff2|svg|png|webmanifest)$/i;
 const PUBLIC_SHELL_ASSETS = [
-  '/',
-  '/manifest.webmanifest',
-  '/icons/icon.svg',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/maskable-192.png',
-  '/icons/maskable-512.png',
-  '/icons/apple-touch-icon.png',
+  '/app/',
+  '/app/manifest.webmanifest',
+  '/app/icons/icon.svg',
+  '/app/icons/icon-192.png',
+  '/app/icons/icon-512.png',
+  '/app/icons/maskable-192.png',
+  '/app/icons/maskable-512.png',
+  '/app/icons/apple-touch-icon.png',
 ] as const;
 
 export function buildPrecacheList(bundleFileNames: readonly string[]): string[] {
   const urls = new Set<string>(PUBLIC_SHELL_ASSETS);
   for (const name of bundleFileNames) {
     const clean = name.replace(/^\/+/, '');
-    if (!clean || clean === 'sw.js' || clean === '_headers') continue;
+    if (
+      !clean ||
+      clean === 'sw.js' ||
+      clean === 'app/sw.js' ||
+      clean === '_headers' ||
+      clean === 'index.html' ||
+      clean === 'en/index.html' ||
+      clean.startsWith('assets/landing')
+    ) {
+      continue;
+    }
     if (/\.wasm$/i.test(clean) || /\.map$/i.test(clean)) continue;
     if (!PRECACHE_EXT_RE.test(clean)) continue;
     urls.add(`/${clean}`);
@@ -34,7 +44,7 @@ export function precacheVersion(precacheUrls: readonly string[], extraSeed = '')
 
 export function renderServiceWorker(version: string, precacheUrls: readonly string[]): string {
   const urlsJson = JSON.stringify(precacheUrls, null, 2);
-  return `// Hand-written PWA service worker generated at build time (ADR 0008).
+  return `// Hand-written PWA service worker generated at build time (ADR 0008, scoped to /app/ per ADR 0012).
 const CACHE_NAME = 'zh3marea-${version}';
 const PRECACHE = ${urlsJson};
 const LAZY_CACHE_RE = /\\.(?:wasm|js|css|ttf|svg|png|webmanifest)$/i;
@@ -70,16 +80,17 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (req.mode === 'navigate') {
+    if (url.pathname !== '/app' && !url.pathname.startsWith('/app/')) return;
     event.respondWith(
       fetch(req)
         .then((res) => {
           if (res.ok) {
             const copy = res.clone();
-            event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put('/', copy)));
+            event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put('/app/', copy)));
           }
           return res;
         })
-        .catch(() => caches.match('/').then((cached) => cached || caches.match('/index.html'))),
+        .catch(() => caches.match('/app/').then((cached) => cached || caches.match('/app/index.html'))),
     );
     return;
   }
@@ -104,7 +115,7 @@ export function zh3mareaPwaPlugin(): Plugin {
   return {
     name: 'zh3marea-pwa',
     configureServer(server) {
-      server.middlewares.use('/sw.js', (_req, res) => {
+      server.middlewares.use('/app/sw.js', (_req, res) => {
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
         res.setHeader('Cache-Control', 'no-cache');
         res.end("self.addEventListener('fetch', () => {});\n");
@@ -116,7 +127,7 @@ export function zh3mareaPwaPlugin(): Plugin {
       const version = precacheVersion(precacheUrls, String(names.length));
       this.emitFile({
         type: 'asset',
-        fileName: 'sw.js',
+        fileName: 'app/sw.js',
         source: renderServiceWorker(version, precacheUrls),
       });
     },

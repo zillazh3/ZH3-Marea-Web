@@ -7,34 +7,44 @@ import {
 } from '@/features/pwa/swClient';
 import { buildPrecacheList, precacheVersion, renderServiceWorker } from '../../tools/pwaPlugin';
 
-describe('PWA precache manifest and service worker lifecycle (T9.3)', () => {
-  it('includes shell, fonts, JS and CSS in precache while excluding CanvasKit WASM', () => {
+describe('PWA precache manifest and service worker lifecycle (T9.3, /app/ scope)', () => {
+  it('includes /app/ shell, fonts, JS and CSS in precache while excluding landing HTML and CanvasKit WASM', () => {
     const list = buildPrecacheList([
       'index.html',
+      'en/index.html',
+      'app/index.html',
       'assets/index-abc123.js',
       'assets/index-def456.css',
+      'assets/landing-111.js',
+      'assets/landing-222.css',
       'assets/InterTight-Bold-123.ttf',
       'assets/canvaskit-xyz999.wasm',
       'assets/export.worker-777.js.map',
-      'sw.js',
+      'app/sw.js',
     ]);
 
-    expect(list).toContain('/');
-    expect(list).toContain('/manifest.webmanifest');
+    expect(list).toContain('/app/');
+    expect(list).toContain('/app/manifest.webmanifest');
+    expect(list).toContain('/app/icons/icon-192.png');
     expect(list).toContain('/assets/index-abc123.js');
     expect(list).toContain('/assets/InterTight-Bold-123.ttf');
+    expect(list).not.toContain('/');
+    expect(list).not.toContain('/index.html');
+    expect(list).not.toContain('/en/index.html');
+    expect(list).not.toContain('/assets/landing-111.js');
     expect(list.some((u) => u.endsWith('.wasm'))).toBe(false);
     expect(list.some((u) => u.endsWith('.map'))).toBe(false);
-    expect(list).not.toContain('/sw.js');
+    expect(list).not.toContain('/app/sw.js');
 
     const v1 = precacheVersion(list);
     const sw = renderServiceWorker(v1, list);
     expect(sw).toContain(`zh3marea-${v1}`);
     expect(sw).toContain("event.data.type === 'SKIP_WAITING'");
     expect(sw).toContain('url.origin !== self.location.origin');
+    expect(sw).toContain("caches.match('/app/')");
   });
 
-  it('notifies on waiting worker update and triggers reload on controllerchange', async () => {
+  it('registers /app/sw.js with /app/ scope, notifies on waiting update and reloads on controllerchange', async () => {
     const containerListeners = new Map<string, () => void>();
     const regListeners = new Map<string, () => void>();
     const workerListeners = new Map<string, () => void>();
@@ -56,9 +66,10 @@ describe('PWA precache manifest and service worker lifecycle (T9.3)', () => {
         regListeners.set(t, fn);
       },
     };
+    const registerMock = vi.fn().mockResolvedValue(reg);
     const container: SwContainerLike = {
       controller: {},
-      register: vi.fn().mockResolvedValue(reg),
+      register: registerMock,
       addEventListener: (t, fn) => {
         containerListeners.set(t, fn);
       },
@@ -73,6 +84,10 @@ describe('PWA precache manifest and service worker lifecycle (T9.3)', () => {
       onReload,
     });
 
+    expect(registerMock).toHaveBeenCalledWith('/app/sw.js', {
+      scope: '/app/',
+      updateViaCache: 'none',
+    });
     expect(holder.apply).not.toBeNull();
     containerListeners.get('controllerchange')?.();
     expect(onReload).not.toHaveBeenCalled();
